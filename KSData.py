@@ -261,6 +261,7 @@ class KSItem:
         
         unique_sns:dict[str,list[KSSerializedItem]] = {}
         new_sns:list[KSSerializedItem] = []
+        new_sns:list[KSSerializedItem] = []
         for new_sn in item_sns:
             if not new_sn.new:
                 if not new_sn.serial_num in unique_sns:
@@ -268,7 +269,14 @@ class KSItem:
                 unique_sns[new_sn.serial_num].append(new_sn)
             else:
                 new_sns.append(new_sn)
+            if not new_sn.new:
+                if not new_sn.serial_num in unique_sns:
+                    unique_sns[new_sn.serial_num] = []
+                unique_sns[new_sn.serial_num].append(new_sn)
+            else:
+                new_sns.append(new_sn)
         
+        pending:dict[str,list[KSSerializedItem]] = {}
         pending:dict[str,list[KSSerializedItem]] = {}
         for sn in my_sns:
             try:
@@ -301,6 +309,10 @@ class KSItem:
             
             for new_sn in value:
                 self.add_serial_item(new_sn, update_qoh=False)
+        
+        for new_sn in new_sns:
+            self.add_serial_item(new_sn,update_qoh=False)
+
         
         for new_sn in new_sns:
             self.add_serial_item(new_sn,update_qoh=False)
