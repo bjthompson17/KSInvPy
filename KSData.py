@@ -260,11 +260,16 @@ class KSItem:
         item_sns = new_item.get_flaged(nflags=exclude_flags)
         
         unique_sns:dict[str,list[KSSerializedItem]] = {}
+        new_sns:list[KSSerializedItem] = []
         for new_sn in item_sns:
-            if not new_sn.serial_num in unique_sns:
-                unique_sns[new_sn.serial_num] = []
-            unique_sns[new_sn.serial_num].append(new_sn)
+            if not new_sn.new:
+                if not new_sn.serial_num in unique_sns:
+                    unique_sns[new_sn.serial_num] = []
+                unique_sns[new_sn.serial_num].append(new_sn)
+            else:
+                new_sns.append(new_sn)
         
+        pending:dict[str,list[KSSerializedItem]] = {}
         for sn in my_sns:
             try:
                 if len(unique_sns[sn.serial_num]) < 1:
@@ -272,8 +277,22 @@ class KSItem:
                     continue
                 new_sn = unique_sns[sn.serial_num].pop()
                 if new_sn.active:
-                    sn.active = new_sn.active
-                sn.set_flags(new_sn.flags)
+                    if not sn.active:
+                        sn.active = new_sn.active
+                        sn.set_flags(new_sn.flags)
+                    else:
+                        if sn.serial_num not in pending:
+                            pending[sn.serial_num] = []
+                        pending[sn.serial_num].append(new_sn)
+                else:
+                    if not sn.active:
+                        if len(pending[sn.serial_num]) < 1:
+                            pending.pop(sn.serial_num)
+                            sn.set_flags(new_sn)
+                        else:
+                            new_sn = pending[sn.serial_num].pop()
+                            sn.active = new_sn.active
+                            sn.set_flags(new_sn.flags)
             except KeyError:
                 continue
     
@@ -282,6 +301,10 @@ class KSItem:
             
             for new_sn in value:
                 self.add_serial_item(new_sn, update_qoh=False)
+        
+        for new_sn in new_sns:
+            self.add_serial_item(new_sn,update_qoh=False)
+
         if self.serialized:
             self.phys = float(self.sn_count)
             
