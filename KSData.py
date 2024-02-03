@@ -108,7 +108,7 @@ class KSItem:
         self.last_count:date = last_count
         self.serialized:bool = serialized
         self._flags:set[str] = set(flags)
-        self.phys:float = 0.0
+        self._phys:float = 0.0
         self.cost:float = cost
         self.retail:float = retail
         
@@ -129,9 +129,21 @@ class KSItem:
     @property
     def flags(self):
         return self._flags
+
     @property
     def qoh(self):
         return self._qoh
+    @qoh.setter
+    def qoh(self,value):
+        self._qoh = float(value)
+
+    @property
+    def phys(self):
+        return self._phys
+    @phys.setter
+    def phys(self,value):
+        self._phys = float(value)
+    
     @property
     def sn_count(self):
         return self.get_serial_count()
@@ -192,7 +204,7 @@ class KSItem:
             str(self.id),
             self.prod_code,
             self.desc,
-            str(self._qoh),
+            str(self.qoh),
             str(self.phys),
             self.last_count.strftime(r'%m/%d/%Y'),
             str(self.serialized),
@@ -235,7 +247,7 @@ class KSItem:
         return item
     
     def merge(self, new_item, options = [], exclude_flags = []):
-        self._qoh = max(new_item._qoh, self._qoh)
+        self.qoh = max(new_item.qoh, self.qoh)
         self.phys += new_item.phys
         
         if new_item.last_count > self.last_count:
@@ -259,7 +271,8 @@ class KSItem:
                     unique_sns.pop(sn.serial_num)
                     continue
                 new_sn = unique_sns[sn.serial_num].pop()
-                sn.active = new_sn.active
+                if new_sn.active:
+                    sn.active = new_sn.active
                 sn.set_flags(new_sn.flags)
             except KeyError:
                 continue
@@ -270,7 +283,7 @@ class KSItem:
             for new_sn in value:
                 self.add_serial_item(new_sn, update_qoh=False)
         if self.serialized:
-            self.phys = self.sn_count
+            self.phys = float(self.sn_count)
             
     def update(self, new_item, options = [], exclude_flags = []):
         unique_sns:dict[str,list[KSSerializedItem]] = {}
@@ -279,8 +292,8 @@ class KSItem:
         
         
         if("keep_phys" not in options):
-            self.phys += new_item._qoh - self._qoh
-        self._qoh = new_item._qoh
+            self.phys += new_item.qoh - self.qoh
+        self.qoh = new_item.qoh
         self.last_count = new_item.last_count
         self.prod_code = new_item.prod_code
         self.desc = new_item.desc
@@ -364,7 +377,7 @@ class KSItem:
     def __repr__(self):
         q = "'"
         c = ":"
-        out_str = f"{self.prod_code + c:<8} \'{self.desc + q:<32} QOH: {int(self._qoh) if self._qoh.is_integer() else self._qoh:<3} Phys: {int(self.phys) if self.phys.is_integer() else self.phys:<3}" + (f"S/N's: {self.get_serial_count():<3}" if self.serialized else "          ") + f" Avg Cost: ${self.cost:.2f}"
+        out_str = f"{self.prod_code + c:<8} \'{self.desc + q:<32} QOH: {int(self.qoh) if self.qoh.is_integer() else self.qoh:<3} Phys: {int(self.phys) if self.phys.is_integer() else self.phys:<3}" + (f"S/N's: {self.get_serial_count():<3}" if self.serialized else "          ") + f" Avg Cost: ${self.cost:.2f}"
         return out_str
 
 class KSSearchResult:
@@ -549,7 +562,7 @@ class KSDataSet:
         for x in value.get_removed():
             rvalues.append(x.serial_num)
         
-        diff = export_phys - value._qoh
+        diff = export_phys - value.qoh
         if diff > 0:
             i = 0
             while i < diff and i < len(avalues):
