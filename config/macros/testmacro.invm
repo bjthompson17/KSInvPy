@@ -1,0 +1,3 @@
+filter /sn $2
+flag green
+filter
