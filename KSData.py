@@ -655,9 +655,10 @@ class KSDataSet:
         instructions = ""
         with open(file_name,"w", encoding="cp1252") as out_file:
             for key,value in self.items.items():
-                instructions += f"\nItem {value.prod_code} - {value.desc}:\n"
                 prep_result = self._prep_for_variance(value)
-                instructions += prep_result[2]
+                if len(prep_result[2]) > 0:
+                    instructions += f"\nItem {value.prod_code} - {value.desc}:\n"
+                    instructions += prep_result[2]
                 # Variance CSV format: 
                 # "[Stock #]","[phys_qty]","[RESERVED]","[comment/sn 1]|[comment/sn 2]|...|[comment/sn n]"
                 line = ",".join((
