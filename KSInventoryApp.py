@@ -906,7 +906,7 @@ command_list = {
     "vexport":export_variance,
     "echo":echo,
     "get_inv":get_inv,
-    "send_inv":send_inv,
+    # "send_inv":send_inv,
     "count":count,
     "uncount":uncount,
     "recount":recount,

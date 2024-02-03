@@ -657,14 +657,14 @@ def export_export():
     KSIA.export_file()
 export_menu.add_command(label = "Export...", command = export_export)
 
-def export_ksdirect():
-    print("Exports->Direct to Keystroke")
-    if messagebox.askokcancel("WARNING!", "Exporting directly to Keystroke overwrites all"
-                              " relevent fields and does not keep track of history.\n"
-                              "Try using \"Export Variance\" first if you have not already.\n\n"
-                              "Are you sure you would like to export directly to Keystroke?",default="cancel"):
-        KSIA.send_inv()
-export_menu.add_command(label = "Direct to Keystroke", command = export_ksdirect)
+# def export_ksdirect():
+#     print("Exports->Direct to Keystroke")
+#     if messagebox.askokcancel("WARNING!", "Exporting directly to Keystroke overwrites all"
+#                               " relevent fields and does not keep track of history.\n"
+#                               "Try using \"Export Variance\" first if you have not already.\n\n"
+#                               "Are you sure you would like to export directly to Keystroke?",default="cancel"):
+#         KSIA.send_inv()
+# export_menu.add_command(label = "Direct to Keystroke", command = export_ksdirect)
 
 
 menu_bar.add_cascade(label = "File", menu = file_menu)
