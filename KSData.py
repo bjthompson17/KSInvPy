@@ -148,6 +148,10 @@ class KSItem:
     def sn_count(self):
         return self.get_serial_count()
     
+    @property
+    def tsn_count(self):
+        return len(self.serial_nums)
+    
     def increase_count(self,amount = 1):
         self.phys += amount
 
@@ -575,6 +579,7 @@ class KSDataSet:
 
     def _prep_for_variance(self, value):
         serial_string = ""
+        instruct_string = ""
         export_phys = value.phys
 
         avalues = []
@@ -595,11 +600,13 @@ class KSDataSet:
             j = 0
             while i < len(avalues) and j < len(rvalues):
                 serial_string += f"Replace: '{rvalues[j]}' with '{avalues[i]}'|"
+                instruct_string += f"Replace: '{rvalues[j]}' with '{avalues[i]}'\n"
                 i += 1
                 j += 1
 
             while j < len(rvalues):
                 serial_string += f"Remove: '{rvalues[j]}'|"
+                instruct_string += f"Remove: '{rvalues[j]}'\n"
                 j+= 1
 
         elif diff < 0:
@@ -611,38 +618,45 @@ class KSDataSet:
             j = 0
             while i < len(rvalues) and j < len(avalues):
                 serial_string += f"Replace: '{rvalues[i]}' with '{avalues[j]}'|"
+                instruct_string += f"Replace: '{rvalues[i]}' with '{avalues[j]}'\n"
                 i += 1
                 j += 1
 
             while j < len(avalues):
                 serial_string += f"Add: '{avalues[j]}'|"
+                instruct_string += f"Add: '{avalues[j]}'\n"
                 j+= 1
         else:
             i = 0
             j = 0
             while i < len(avalues) and j < len(rvalues):
                 serial_string += f"Replace: '{rvalues[j]}' with '{avalues[i]}'|"
+                instruct_string += f"Replace: '{rvalues[j]}' with '{avalues[i]}'\n"
                 i += 1
                 j += 1
+                
+            while j < len(rvalues):
+                serial_string += f"Remove: '{rvalues[j]}'|"
+                instruct_string += f"Remove: '{rvalues[j]}'\n"
+                j+= 1
 
             while i < len(avalues):
                 serial_string += f"Add: '{avalues[i]}'|"
+                instruct_string += f"Add: '{avalues[i]}'\n"
                 i+= 1
 
-            while j < len(rvalues):
-                serial_string += f"Remove: '{rvalues[j]}'|"
-                j+= 1
 
         serial_string = serial_string.strip("|")
         
-        return (export_phys, serial_string)
+        return (export_phys, serial_string, instruct_string)
     
     # TODO: Allow configuration for product code or stock number exports.
     def export_variance(self, file_name:str):
+        instructions = ""
         with open(file_name,"w", encoding="cp1252") as out_file:
             for key,value in self.items.items():
                 prep_result = self._prep_for_variance(value)
-
+                instructions += prep_result[2]
                 # Variance CSV format: 
                 # "[Stock #]","[phys_qty]","[RESERVED]","[comment/sn 1]|[comment/sn 2]|...|[comment/sn n]"
                 line = ",".join((
@@ -652,6 +666,7 @@ class KSDataSet:
                     f'"{prep_result[1]}"\n'     #4
                 ))
                 out_file.write(line)
+        return instructions
 
     def read_file(self, filename:str, resolve_conflicts:Literal["skip","merge","update","replace"] = "merge", options = [], exclude_flags = []):
         with open(filename,"r") as in_file:

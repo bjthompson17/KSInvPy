@@ -672,7 +672,10 @@ def export_variance(scope = None, switches:dict[str,str] = {}, options:set[str] 
 
     def _wrapper(flags = "",nflags = "",**kwargs):
         get_inventory()
-        data.export_variance(file)
+        instructions = data.export_variance(file)
+        with open(f"{os.path.dirname(file)}/Instructions.txt","w") as fout:
+            fout.write(instructions)
+        os.system(f"{os.path.dirname(file)}/Instructions.txt")
         return file
     return _wrapper(**switches)
 # @_global_docs
