@@ -667,7 +667,7 @@ def export_variance(scope = None, switches:dict[str,str] = {}, options:set[str] 
     if "file" in switches:
         file = switches["file"]
     elif file == "":
-        file = save_file_dialogue(title = "Export Variance file", default_dir="K:/InventoryExports", default_name="KSVARIANCE.LOG", types=[("Keystoke Variance File","log")])
+        file = save_file_dialogue(title = "Export Variance file", default_dir="K:\\InventoryExports", default_name="KSVARIANCE.LOG", types=[("Keystoke Variance File","log")])
     if file == None: return False
 
     def _wrapper(flags = "",nflags = "",**kwargs):
@@ -697,7 +697,7 @@ def load(scope = None, switches:dict[str,str] = {}, options:set[str] = set(), va
         if file != None:
             file_names.append(file)
         elif len(file_names) < 1:
-            file_names = open_file_dialogue(title="Open File", default_name=f"inventory",types=[("Inventory Count File","count")])
+            file_names = open_file_dialogue(title="Open File", default_dir="K:\\InventoryExports\\Counts", default_name=f"inventory",types=[("Inventory Count File","count")])
 
         if file_names != None:
             if conflicts == "replace":
@@ -727,7 +727,7 @@ def save(scope = None, switches:dict[str,str] = {}, options:set[str] = set(), va
     elif file == "":
         min,max = get_inv_range()
         file = save_file_dialogue(title = "Save file", 
-                                  default_dir="K:/InventoryExports/Counts",
+                                  default_dir="K:\\InventoryExports\\Counts",
                                   default_name=f"inventory_{min}-{max}" if data.filename == "" else data.filename, 
                                   types=[("Inventory Count File","count")])
     if file == None: return False
