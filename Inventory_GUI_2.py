@@ -49,7 +49,7 @@ class PrintWindow(simpledialog.Dialog):
                 driver_name = printer_data["pDriverName"]
             finally:
                 wp.ClosePrinter(printer)
-            if driver_name != None and ("ZDesigner TLP 2844" in driver_name or "Generic / Text Only" in driver_name):
+            if driver_name != None and ("ZDesigner" in driver_name or "Generic / Text Only" in driver_name):
                 self.printer_names.append(x[2])
                 pass
 

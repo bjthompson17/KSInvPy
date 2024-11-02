@@ -603,11 +603,16 @@ class KSDataSet:
                 instruct_string += f"Replace: '{rvalues[j]}' with '{avalues[i]}'\n"
                 i += 1
                 j += 1
+                
+            while i < len(avalues):
+                serial_string += f"Add: '{avalues[i]}'|"
+                instruct_string += f"Add: '{avalues[i]}'\n"
+                i += 1
 
             while j < len(rvalues):
                 serial_string += f"Remove: '{rvalues[j]}'|"
                 instruct_string += f"Remove: '{rvalues[j]}'\n"
-                j+= 1
+                j += 1
 
         elif diff < 0:
             i = 0
@@ -625,7 +630,13 @@ class KSDataSet:
             while j < len(avalues):
                 serial_string += f"Add: '{avalues[j]}'|"
                 instruct_string += f"Add: '{avalues[j]}'\n"
-                j+= 1
+                j += 1
+            
+            while i < len(rvalues):
+                serial_string += f"Remove: '{rvalues[i]}'|"
+                instruct_string += f"Remove: '{rvalues[i]}'\n"
+                i += 1
+                
         else:
             i = 0
             j = 0
@@ -652,7 +663,11 @@ class KSDataSet:
     
     # TODO: Allow configuration for product code or stock number exports.
     def export_variance(self, file_name:str):
-        instructions = ""
+        instructions = ("Exit -> Database Manager\n"
+                        "Special -> Variance, press OK\n"
+                        "Variance -> Parameters -> Entry Field -> Stock Number, press F10\n"
+                        "Special -> Import File..., press F10\n"
+                        "\n")
         with open(file_name,"w", encoding="cp1252") as out_file:
             for key,value in self.items.items():
                 prep_result = self._prep_for_variance(value)
