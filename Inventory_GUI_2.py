@@ -59,56 +59,73 @@ class PrintWindow(simpledialog.Dialog):
             print("No Valid printers")
             self.printer_names.append("None")
             self.selected_printer.set("None")
-        elif "ZDesigner TLP 2844 (USB)" in self.printer_names:
-            self.selected_printer.set( "ZDesigner TLP 2844 (USB)" )
-        elif "ZDesigner TLP 2844 (REG 12)" in self.printer_names:
-            self.selected_printer.set( "ZDesigner TLP 2844 (REG 12)" )
         elif wp.GetDefaultPrinter() in self.printer_names:
             self.selected_printer.set( wp.GetDefaultPrinter() )
         else :
             self.selected_printer.set( self.printer_names[0] )
             
+        self.dpi = tk.IntVar()
+        self.language = tk.StringVar()
+
+        def on_printer_change(a,b,c):
+            global dpi, language
+            select_str = self.selected_printer.get().lower()
+            if("300dpi" in select_str):
+                self.dpi.set(300)
+            elif("203dpi" in select_str):
+                self.dpi.set(203)
+            if("zpl" in select_str):
+                self.language.set("ZPL")
+            elif("epl" in select_str):
+                self.language.set("EPL")
+        self.selected_printer.trace_add("write",on_printer_change)
+        on_printer_change("","","")
+        
+        self.print_items:KSD.KSSearchResult = KSIA.find(filter_results)
+        count = 0
+        extra = 0
+        self.item_list = ""
+        for key,value in self.print_items.items():
+            for sn in value:
+                count += 1
+                if count < 10:
+                    self.item_list += sn.serial_num + "\n"
+                else:
+                    extra += 1
+        if extra > 0:
+            self.item_list += f"...[{extra} more items]"
+        self.item_list = self.item_list.strip()
         simpledialog.Dialog.__init__(self,parent,title)
     
     def body(self,master:tk.Frame):
         tk.Label(master,text = "Select Printer:")
         self.printer_menu = tk.OptionMenu( master , self.selected_printer , *(self.printer_names) )
+        settings_frame = tk.Frame(master)
+        self.printer_dpi = tk.OptionMenu(settings_frame,self.dpi,203,300)
+        self.printer_lang = tk.OptionMenu(settings_frame,self.language,"EPL","ZPL")
         self.printer_menu.pack()
-        tk.Label(master,text = "Flagged:",anchor="w").pack(fill='x')
-        self.flag_entry = tk.Entry(master,width = 20)
-        self.flag_entry.pack()
-        tk.Label(master,text = "not Flagged: ",anchor="w").pack(fill='x')
-        self.nflag_entry = tk.Entry(master,width = 20)
-        self.nflag_entry.pack()
-        return self.flag_entry
+        settings_frame.pack()
+        self.printer_dpi.pack(side = tk.LEFT)
+        self.printer_lang.pack(side = tk.LEFT)
+        tk.Label(master,text=self.item_list).pack()
+        # tk.Label(master,text = "Flagged:",anchor="w").pack(fill='x')
+        # self.flag_entry = tk.Entry(master,width = 20)
+        # self.flag_entry.pack()
+        # tk.Label(master,text = "not Flagged: ",anchor="w").pack(fill='x')
+        # self.nflag_entry = tk.Entry(master,width = 20)
+        # self.nflag_entry.pack()
+        return self.printer_menu
     
     def apply(self):
-        print_items:KSD.KSSearchResult = KSIA.find(filter_results,{"flags":self.flag_entry.get(),"nflags":self.nflag_entry.get()})
-        
-        count = 0
-        extra = 0
-        item_list = ""
-        for key,value in print_items.items():
-            for sn in value:
-                count += 1
-                if count < 10:
-                    item_list += sn.serial_num + "\n"
-                else:
-                    extra += 1
-        if extra > 0:
-            item_list += f"...[{extra} more items]"
-        item_list = item_list.strip()
-        
-
         confirm = messagebox.askyesno(
             "Confirm Print items", 
             "Are you sure you would like to print labels for the following items?:\n" 
-            + item_list
+            + self.item_list
         )
         
         if confirm:
             self.result = self.selected_printer.get()
-            KSIA.print_labels(self.result,print_items)
+            KSIA.print_labels(self.result,self.dpi.get(),self.language.get(),self.print_items)
 
 class GetInvWindow(simpledialog.Dialog):
     # Should be Configurable

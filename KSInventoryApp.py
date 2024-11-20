@@ -263,7 +263,7 @@ def get_label_printers(valid_drivers:list[str] = ["Generic / Text Only"]):
                     printer_names.append(x[2])
                     break
     return printer_names.copy()
-def print_labels(selected_printer:str, print_items:ksd.KSSearchResult):
+def print_labels(selected_printer:str,dpi:int,language:str, print_items:ksd.KSSearchResult):
         printer = wp.OpenPrinter(selected_printer)
         output_file = None
         output_type = "RAW"
@@ -284,7 +284,9 @@ def print_labels(selected_printer:str, print_items:ksd.KSSearchResult):
                         serial_num = sn.serial_num
                         if item_num == "" and serial_num == "": continue
 
-                        string = \
+                        string = ""
+                        if(dpi == 203 and language == "EPL"):
+                            string = \
 f"""N
 Q195,70
 R200,0
@@ -294,6 +296,17 @@ ZB
 B20,25,0,1,2,3,50,B,"{item_num}"
 b20,115,P,400,70,s{max(0,int( (64 - len(serial_num)) / 16 ))},f0,x3,y5,"{serial_num}"
 P1
+"""
+                        elif(dpi == 300 and language == "ZPL"):
+                            string = \
+f"""
+^XA^LH60,133^FWN,0
+^FO0,10^A@N,40,35,E:CON000.TTF
+^BCN,75,Y,N,N,A
+^FD{item_num}^FS
+^FO0,150^B7N,6,3,14,10,N
+^FD{serial_num}^FS
+^XZ
 """
                         byte_data = string
                         if output_type == "RAW":
