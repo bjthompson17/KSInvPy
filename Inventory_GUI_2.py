@@ -501,7 +501,7 @@ def update_screen():
             v = 0
             for i,sn1 in enumerate(key.serial_nums):
                 if(v >= len(value)): break
-                if(sn1.serial_num == value[v].serial_num):
+                if(sn1.id == value[v].id):
                     sn=value[v]
                     v += 1
                 else:
