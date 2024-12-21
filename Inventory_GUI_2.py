@@ -497,8 +497,8 @@ def update_screen():
         
         if key.serialized:
             item_sn_count = 0
-            for sn in value:
-                text_display.insert(tk.END,'\t'+repr(sn) + '\n', (f'SN{sn.id}'))
+            for i,sn in enumerate(value):
+                text_display.insert(tk.END,str(i+1)+'-\t'+repr(sn) + '\n', (f'SN{sn.id}'))
                 
                 item_sn_count += 1
                 sn_count += 1

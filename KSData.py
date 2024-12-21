@@ -404,7 +404,7 @@ class KSItem:
     def __repr__(self):
         q = "'"
         c = ":"
-        out_str = f"{self.prod_code + c:<8} \'{self.desc + q:<32} QOH: {int(self.qoh) if self.qoh.is_integer() else self.qoh:<3} Phys: {int(self.phys) if self.phys.is_integer() else self.phys:<3}" + (f"S/N's: {self.get_serial_count():<3}" if self.serialized else "          ") + f" Avg Cost: ${self.cost:.2f}"
+        out_str = f"{self.prod_code + c:<8} \'{self.desc + q:<32} QOH: {int(self.qoh) if self.qoh.is_integer() else self.qoh:<3} Phys: {int(self.phys) if self.phys.is_integer() else self.phys:<3}" + f" Avg Cost: ${self.cost:.2f}"
         return out_str
 
 class KSSearchResult:
