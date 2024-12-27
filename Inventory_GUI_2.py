@@ -194,7 +194,62 @@ class GetInvWindow(simpledialog.Dialog):
         store_num = self.STORES.index(self.store_name.get())
         self.result = (self.range_entry.get(),store_num)
         return 1
+
+class ItemDetailWindow(simpledialog.Dialog):
+    def __init__(self, parent, title = None, item:KSD.KSItem = None):
+        self.item = item
+        simpledialog.Dialog.__init__(self, parent, title)
+    def body(self, master):
+        id_frame = tk.Frame(master)
+        if(self.item == None):
+            self.item = KSD.KSItem(0)
+        tk.Label(id_frame, text=f"Product Code: {self.item.prod_code}").pack(side='left')
+        tk.Label(id_frame, text=f"ID: {self.item.id}").pack(side='right')
+        id_frame.pack(expand=True,fill='x')
         
+        self.phys_count = tk.IntVar(value = self.item.phys)
+        count_frame = tk.Frame(master)
+        tk.Label(count_frame, text = f"QOH {self.item.qoh}").pack(side='left')
+        phys_entry = tk.Entry(count_frame, textvariable=self.phys_count)
+        phys_entry.pack(side="right")
+        tk.Label(count_frame, text = "Physical Count: ").pack(side='right')
+        count_frame.pack(expand=True,fill='x')
+        self.serial_list = None
+        
+        if(not self.item.serialized):
+            master.bind("<KeyPress-=>", lambda e: self.phys_count.set(self.phys_count.get()+1))
+            master.bind("<KeyPress-minus>", lambda e: self.phys_count.set(self.phys_count.get()-1))
+            master.bind("<KeyPress-+>", lambda e: self.phys_count.set(self.phys_count.get()+10))
+            master.bind("<KeyPress-_>", lambda e: self.phys_count.set(self.phys_count.get()-10))
+            master.bind("<Alt-c>", lambda e: phys_entry.focus_set())
+            master.bind("<Alt-C>", lambda e: phys_entry.focus_set())
+            
+        else:
+            phys_entry.config(state="disabled")
+            
+            self.serial_list = tk.Listbox(master,background="#999", foreground="#444", selectbackground="#ddd", selectforeground="black")
+            for sn in self.item.serial_nums:
+                self.serial_list.insert(tk.END,sn.serial_num)
+                if(sn.active):
+                    self.serial_list.selection_set(tk.END)
+            self.serial_list.pack(fill='x')
+        
+        return phys_entry
+
+    def apply(self):
+        if(not self.item.serialized):
+            self.item.phys = self.phys_count.get()
+        elif(self.serial_list != None):
+            for i,sn in enumerate(self.item.serial_nums):
+                if self.serial_list.select_includes(i):
+                    sn.restore()
+                else: 
+                    sn.remove()
+        pass
+    
+    # def validate(self):
+    #     return 1
+     
 # Overloading commands 
 def my_filter(scope,switches,options,values):
     global filter_results
@@ -676,6 +731,7 @@ export_menu.add_command(label = "Export Variance", command = export_vexport)
 def export_import():
     print("Exports->Import")
     KSIA.import_file()
+    refresh_filter()
 export_menu.add_command(label = "Import...", command = export_import)
 
 def export_export():
@@ -1003,6 +1059,8 @@ window.bind("<Alt-Q>", lambda e: scan_quantity_entry.focus_set())
 # Global Control Frame
 window.bind("<Alt-x>", lambda e: global_ctrl_flags.focus_set())
 window.bind("<Alt-X>", lambda e: global_ctrl_flags.focus_set())
+
+window.bind("<F3>", lambda e: ItemDetailWindow(window,item=filter_results.get_first_item()))
 
 def on_closing():
     if messagebox.askokcancel("Quit", "Do you want to quit?"):
