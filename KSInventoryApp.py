@@ -684,7 +684,7 @@ def export_variance(scope = None, switches:dict[str,str] = {}, options:set[str] 
     if file == None: return False
 
     def _wrapper(flags = "",nflags = "",**kwargs):
-        get_inventory()
+        get_inventory(store_num=current_store)
         instructions = data.export_variance(file)
         with open(f"{os.path.dirname(file)}/Instructions.txt","w") as fout:
             fout.write(instructions)
