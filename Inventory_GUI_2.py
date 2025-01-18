@@ -217,10 +217,10 @@ class ItemDetailWindow(simpledialog.Dialog):
         self.serial_list = None
         
         if(not self.item.serialized):
-            master.bind("<KeyPress-=>", lambda e: self.phys_count.set(self.phys_count.get()+1))
-            master.bind("<KeyPress-minus>", lambda e: self.phys_count.set(self.phys_count.get()-1))
-            master.bind("<KeyPress-+>", lambda e: self.phys_count.set(self.phys_count.get()+10))
-            master.bind("<KeyPress-_>", lambda e: self.phys_count.set(self.phys_count.get()-10))
+            master.bind("<Alt-=>", lambda e: self.phys_count.set(self.phys_count.get()+1))
+            master.bind("<Alt-minus>", lambda e: self.phys_count.set(self.phys_count.get()-1))
+            master.bind("<Alt-+>", lambda e: self.phys_count.set(self.phys_count.get()+10))
+            master.bind("<Alt-_>", lambda e: self.phys_count.set(self.phys_count.get()-10))
             master.bind("<Alt-c>", lambda e: phys_entry.focus_set())
             master.bind("<Alt-C>", lambda e: phys_entry.focus_set())
             
@@ -245,7 +245,6 @@ class ItemDetailWindow(simpledialog.Dialog):
                     sn.restore()
                 else: 
                     sn.remove()
-        pass
     
     # def validate(self):
     #     return 1
@@ -1060,7 +1059,11 @@ window.bind("<Alt-Q>", lambda e: scan_quantity_entry.focus_set())
 window.bind("<Alt-x>", lambda e: global_ctrl_flags.focus_set())
 window.bind("<Alt-X>", lambda e: global_ctrl_flags.focus_set())
 
-window.bind("<F3>", lambda e: ItemDetailWindow(window,item=filter_results.get_first_item()))
+def manage_item_details(e):
+    ItemDetailWindow(window,item=filter_results.get_first_item())
+    update_screen()
+
+window.bind("<F3>", manage_item_details)
 
 def on_closing():
     if messagebox.askokcancel("Quit", "Do you want to quit?"):
