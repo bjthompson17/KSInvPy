@@ -26,7 +26,7 @@ window.geometry("800x500")
 
 menu_bar = tk.Menu(window, tearoff = 0)
 control_frame = tk.Frame(window)
-text_display = tk.Text(window, state = tk.DISABLED, wrap = 'none')
+text_display = tk.Text(window, state = tk.DISABLED, wrap = 'none', font=("Consolas",12))
 vsb = tk.Scrollbar(window, orient='vertical',command = text_display.yview)
 text_display["yscrollcommand"] = vsb.set
 
@@ -537,9 +537,9 @@ def update_screen():
             percent_full = 0.0
         item_bg_color = None
         if percent_over <= 0:
-            item_bg_color = blend_color("#933","#393", percent_full)
+            item_bg_color = blend_color("#A66","#6A6", percent_full)
         else:
-            item_bg_color = blend_color("#393","#737", percent_over)
+            item_bg_color = blend_color("#6A6","#A6A", percent_over)
         
         fg_color = "#000"
         bg_color = "#555"
