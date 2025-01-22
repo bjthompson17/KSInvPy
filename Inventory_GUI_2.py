@@ -12,15 +12,7 @@ import KSInventoryApp as KSIA
 # TODO: Allow UI configuration for product code or stock # 
 # in export variance.
 
-# Configurations
-REMOVED_TEXT_COLOR = "#444"
-FLAG_BG_COLOR = "#39d"
-NORM_BG_COLOR = "#ddd"
-NORM_FG_COLOR = "#000"
-DARK_FG_COLOR = "#fff"
-SELECTED_BG_COLOR = "blue"
-SELECTED_FG_COLOR = "white"
-
+# TODO: Increase font size
 
 #TODO: Make manual fixes easier
 filter_results:KSD.KSSearchResult = KSD.KSSearchResult()
@@ -207,35 +199,52 @@ class ItemDetailWindow(simpledialog.Dialog):
         tk.Label(id_frame, text=f"ID: {self.item.id}").pack(side='right')
         id_frame.pack(expand=True,fill='x')
         
+        money_frame = tk.Frame(master)
+        tk.Label(money_frame, text = f"Avg. Cost: ${self.item.cost}").pack(side='left')
+        tk.Label(money_frame, text = f"Base Price: ${self.item.retail}").pack(side='right')
+        money_frame.pack(expand=True,fill='x')
+        
+        desc_frame = tk.Frame(master)
+        tk.Label(desc_frame, text=f"Desc: {self.item.desc}").pack(side='left')
+        desc_frame.pack(expand=True,fill='x')
+        
         self.phys_count = tk.IntVar(value = self.item.phys)
         count_frame = tk.Frame(master)
-        tk.Label(count_frame, text = f"QOH {self.item.qoh}").pack(side='left')
+        tk.Label(count_frame, text = f"QOH: {self.item.qoh} ").pack(side='left')
         phys_entry = tk.Entry(count_frame, textvariable=self.phys_count)
         phys_entry.pack(side="right")
         tk.Label(count_frame, text = "Physical Count: ").pack(side='right')
         count_frame.pack(expand=True,fill='x')
         self.serial_list = None
         
+        
+        
         if(not self.item.serialized):
-            master.bind("<Alt-=>", lambda e: self.phys_count.set(self.phys_count.get()+1))
-            master.bind("<Alt-minus>", lambda e: self.phys_count.set(self.phys_count.get()-1))
-            master.bind("<Alt-+>", lambda e: self.phys_count.set(self.phys_count.get()+10))
-            master.bind("<Alt-_>", lambda e: self.phys_count.set(self.phys_count.get()-10))
-            master.bind("<Alt-c>", lambda e: phys_entry.focus_set())
-            master.bind("<Alt-C>", lambda e: phys_entry.focus_set())
+            self.bind("<Alt-=>", lambda e: self.changeCount(1))
+            self.bind("<Alt-minus>", lambda e: self.changeCount(-1))
+            self.bind("<Alt-+>", lambda e: self.changeCount(10))
+            self.bind("<Alt-_>", lambda e: self.changeCount(-10))
+            self.bind("<Alt-c>", lambda e: phys_entry.focus_set())
+            self.bind("<Alt-C>", lambda e: phys_entry.focus_set())
+            print("Bound keys")
             
         else:
             phys_entry.config(state="disabled")
             
-            self.serial_list = tk.Listbox(master,background="#999", foreground="#444", selectbackground="#ddd", selectforeground="black")
+            self.serial_list = tk.Listbox(master,background="#999", foreground="#444", selectbackground="#ddd", 
+                                          selectforeground="black", selectmode=tk.MULTIPLE)
             for sn in self.item.serial_nums:
                 self.serial_list.insert(tk.END,sn.serial_num)
                 if(sn.active):
                     self.serial_list.selection_set(tk.END)
             self.serial_list.pack(fill='x')
+            return self.serial_list
         
         return phys_entry
-
+    
+    def changeCount(self, amount):
+        self.phys_count.set(self.phys_count.get()+amount)
+    
     def apply(self):
         if(not self.item.serialized):
             self.item.phys = self.phys_count.get()
