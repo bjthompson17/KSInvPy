@@ -428,6 +428,9 @@ class KSSearchResult:
     def get_first_item(self):
         for key in self.keys():
             return key
+    def get_first_result(self):
+        for key,value in self.items():
+            return (key,value)
     def get_items(self):
         return list(self.result.keys())
     def get_serial_nums(self):

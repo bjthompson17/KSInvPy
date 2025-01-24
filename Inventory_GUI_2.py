@@ -188,13 +188,16 @@ class GetInvWindow(simpledialog.Dialog):
         return 1
 
 class ItemDetailWindow(simpledialog.Dialog):
-    def __init__(self, parent, title = None, item:KSD.KSItem = None):
-        self.item = item
+    def __init__(self, parent, title = None, result:(KSD.KSItem,[KSD.KSSerializedItem]) = None):
+        if(result == None or len(result) < 2):
+            self.item = KSD.KSItem(0)
+            self.sns = []
+        else:
+            self.item = result[0] #item
+            self.sns = result[1]
         simpledialog.Dialog.__init__(self, parent, title)
     def body(self, master):
         id_frame = tk.Frame(master)
-        if(self.item == None):
-            self.item = KSD.KSItem(0)
         tk.Label(id_frame, text=f"Product Code: {self.item.prod_code}").pack(side='left')
         tk.Label(id_frame, text=f"ID: {self.item.id}").pack(side='right')
         id_frame.pack(expand=True,fill='x')
@@ -226,14 +229,12 @@ class ItemDetailWindow(simpledialog.Dialog):
             self.bind("<Alt-_>", lambda e: self.changeCount(-10))
             self.bind("<Alt-c>", lambda e: phys_entry.focus_set())
             self.bind("<Alt-C>", lambda e: phys_entry.focus_set())
-            print("Bound keys")
-            
         else:
             phys_entry.config(state="disabled")
             
             self.serial_list = tk.Listbox(master,background="#999", foreground="#444", selectbackground="#ddd", 
                                           selectforeground="black", selectmode=tk.MULTIPLE)
-            for sn in self.item.serial_nums:
+            for sn in self.sns:
                 self.serial_list.insert(tk.END,sn.serial_num)
                 if(sn.active):
                     self.serial_list.selection_set(tk.END)
@@ -249,7 +250,7 @@ class ItemDetailWindow(simpledialog.Dialog):
         if(not self.item.serialized):
             self.item.phys = self.phys_count.get()
         elif(self.serial_list != None):
-            for i,sn in enumerate(self.item.serial_nums):
+            for i,sn in enumerate(self.sns):
                 if self.serial_list.select_includes(i):
                     sn.restore()
                 else: 
@@ -1069,7 +1070,7 @@ window.bind("<Alt-x>", lambda e: global_ctrl_flags.focus_set())
 window.bind("<Alt-X>", lambda e: global_ctrl_flags.focus_set())
 
 def manage_item_details(e):
-    ItemDetailWindow(window,item=filter_results.get_first_item())
+    ItemDetailWindow(window,result=(filter_results.get_first_result() if (len(filter_results.result) > 0) else None))
     update_screen()
 
 window.bind("<F3>", manage_item_details)
