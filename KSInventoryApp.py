@@ -21,7 +21,7 @@ MACRO_EXTENSION = ".invm"
 def init_config():
     for p in CONFIG_PATH.split(";"):
         if not os.path.exists(p):
-            os.makedirs(p + "\macros")
+            os.makedirs(p + r"\macros")
 init_config()
 
 ## Helpers
@@ -218,7 +218,7 @@ def get_inventory(export_file:str|None = "K:\\InventoryExports\\TEMP_EXPORT.EXP"
     if len(inv_ranges) > 0:
         for r in inv_ranges:
             os.system(f'echo Retrieving Items in range {r[0]},{r[1]}...')
-            os.system(f'KSEXPORT.EXE /NOP /NODISPLAY /D {store_data[store_num]} FILE="{export_file}" TAB=ON TYPE=DI SORT={sort_field} START={r[0]} END={r[1]} INIFILE=K:\KEYSTROK\INIS\MAIN\KSEXP.INI')
+            os.system(f'KSEXPORT.EXE /NOP /NODISPLAY /D {store_data[store_num]} FILE="{export_file}" TAB=ON TYPE=DI SORT={sort_field} START={r[0]} END={r[1]} INIFILE=K:\\KEYSTROK\\INIS\\MAIN\\KSEXP.INI')
             data.import_file(export_file,conflicts, exclude_flags = ["new"])
     else:
         os.system(f'echo No import range given ...')
@@ -326,9 +326,9 @@ def parse_search_args(switches:dict[str,str], options:set[str]):
     search_args = {}
     for switch,value in switches.items():
         if switch == "id":
-            search_args["serial_id"] = qp_split(value,delimiters="\s,")
+            search_args["serial_id"] = qp_split(value,delimiters=r"\s,")
         elif switch == "nid":
-            search_args["nserial_id"] = qp_split(value,delimiters="\s,")
+            search_args["nserial_id"] = qp_split(value,delimiters=r"\s,")
         elif switch == "item":
             search_args["prod_code"] = qp_split(value)
         elif switch == "nitem":
@@ -422,7 +422,7 @@ def qp_unescape(escape_str:str, escape_chars = [r'\\',r'"'], escape_sequence = '
             return s[len(escape_sequence):]
         return ''
     return re.sub(sub_str, repl_func, escape_str)
-def qp_split(search_str:str, delimiters = "\s", quote_modifier:Callable[[str],str] = re.escape):
+def qp_split(search_str:str, delimiters = r"\s", quote_modifier:Callable[[str],str] = re.escape):
         results = []
 
         # re.sub(r'\\"|\\\\', repl_func, "")
