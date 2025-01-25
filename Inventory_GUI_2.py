@@ -188,7 +188,7 @@ class GetInvWindow(simpledialog.Dialog):
         return 1
 
 class ItemDetailWindow(simpledialog.Dialog):
-    def __init__(self, parent, title = None, result:(KSD.KSItem,[KSD.KSSerializedItem]) = None):
+    def __init__(self, parent, title = None, result:tuple[KSD.KSItem,list[KSD.KSSerializedItem]] = None):
         if(result == None or len(result) < 2):
             self.item = KSD.KSItem(0)
             self.sns = []
