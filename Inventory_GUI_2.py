@@ -17,8 +17,8 @@ import KSInventoryApp as KSIA
 #TODO: Make manual fixes easier
 filter_results:KSD.KSSearchResult = KSD.KSSearchResult()
 
-error_frequency = 1500  # Set Frequency To 2500 Hertz
-error_duration = 500  # Set Duration To 100 ms == .1 second
+error_frequency = 1500  # frequency in Hertz
+error_duration = 500  # duration in ms
 
 window = tk.Tk()
 window.title("Inventory Bikes")
