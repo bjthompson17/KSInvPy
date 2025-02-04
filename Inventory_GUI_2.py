@@ -9,12 +9,12 @@ from typing import Literal,Any
 import KSData as KSD
 import KSInventoryApp as KSIA
 
-# TODO: Allow UI configuration for product code or stock # 
+# TODO: Add UI configuration for product code or stock # 
 # in export variance.
 
-# TODO: Increase font size
+# TODO: Add checkbox to enable/disable RegEx searching
 
-#TODO: Make manual fixes easier
+#TODO: Make manual fixes easier (half done)
 filter_results:KSD.KSSearchResult = KSD.KSSearchResult()
 
 error_frequency = 1500  # frequency in Hertz
