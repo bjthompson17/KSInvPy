@@ -15,6 +15,13 @@ import KSInventoryApp as KSIA
 # TODO: Add checkbox to enable/disable RegEx searching
 
 #TODO: Make manual fixes easier (half done)
+
+#TODO: add cursor selection support. Relevant example code below:
+# text_widget.mark_set(tk.INSERT, "1.0")  # Set cursor position to line 1, column 0
+# position = text_widget.index(tk.INSERT) # Get cursor position. Returns line.column
+#
+# More info on text indicies: https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/text-index.html
+
 filter_results:KSD.KSSearchResult = KSD.KSSearchResult()
 
 error_frequency = 1500  # frequency in Hertz
