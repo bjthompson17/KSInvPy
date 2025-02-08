@@ -14,9 +14,9 @@ import KSInventoryApp as KSIA
 
 # TODO: Add checkbox to enable/disable RegEx searching
 
-#TODO: Make manual fixes easier (half done)
+# TODO: Make manual fixes easier (half done)
 
-#TODO: add cursor selection support. Relevant example code below:
+# TODO: add cursor selection support. Relevant example code below:
 # text_widget.mark_set(tk.INSERT, "1.0")  # Set cursor position to line 1, column 0
 # position = text_widget.index(tk.INSERT) # Get cursor position. Returns line.column
 #
@@ -67,7 +67,6 @@ class PrintWindow(simpledialog.Dialog):
         self.language = tk.StringVar()
 
         def on_printer_change(a,b,c):
-            global dpi, language
             select_str = self.selected_printer.get().lower()
             if("300dpi" in select_str):
                 self.dpi.set(300)
@@ -107,12 +106,6 @@ class PrintWindow(simpledialog.Dialog):
         self.printer_dpi.pack(side = tk.LEFT)
         self.printer_lang.pack(side = tk.LEFT)
         tk.Label(master,text=self.item_list).pack()
-        # tk.Label(master,text = "Flagged:",anchor="w").pack(fill='x')
-        # self.flag_entry = tk.Entry(master,width = 20)
-        # self.flag_entry.pack()
-        # tk.Label(master,text = "not Flagged: ",anchor="w").pack(fill='x')
-        # self.nflag_entry = tk.Entry(master,width = 20)
-        # self.nflag_entry.pack()
         return self.printer_menu
     
     def apply(self):
@@ -749,21 +742,6 @@ def export_import():
     KSIA.import_file()
     refresh_filter()
 export_menu.add_command(label = "Import...", command = export_import)
-
-def export_export():
-    print("Exports->Export")
-    KSIA.export_file()
-export_menu.add_command(label = "Export...", command = export_export)
-
-# def export_ksdirect():
-#     print("Exports->Direct to Keystroke")
-#     if messagebox.askokcancel("WARNING!", "Exporting directly to Keystroke overwrites all"
-#                               " relevent fields and does not keep track of history.\n"
-#                               "Try using \"Export Variance\" first if you have not already.\n\n"
-#                               "Are you sure you would like to export directly to Keystroke?",default="cancel"):
-#         KSIA.send_inv()
-# export_menu.add_command(label = "Direct to Keystroke", command = export_ksdirect)
-
 
 menu_bar.add_cascade(label = "File", menu = file_menu)
 menu_bar.add_cascade( label = "Exports", menu=export_menu)
