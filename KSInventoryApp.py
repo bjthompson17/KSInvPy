@@ -18,6 +18,17 @@ LOCAL_MACRO_PATH = LOCAL_CONFIG_PATH + r"\macros"
 SHARED_MACRO_PATH = SHARED_CONFIG_PATH + r"\macros"
 MACRO_EXTENSION = ".invm"
 
+ks_path = "\\KSServer\\ks"
+ks_link_enabled = False
+if os.path.exists("K:\\KEYSTROK\\Keystroke.exe"):
+    ks_path = "K:"
+    ks_link_enabled = True
+elif os.path.exists("C:\\ks\\KEYSTROK\\Keystroke.exe"):
+    ks_path = "C:\\ks"
+    ks_link_enabled = True
+else:
+    print("Keystroke path not found. Unable to update inventory.")
+
 def init_config():
     for p in CONFIG_PATH.split(";"):
         if not os.path.exists(p):
@@ -166,7 +177,7 @@ def get_inv_range():
             max = value.prod_code
             
     return (min,max)
-def get_inventory(export_file:str|None = "K:\\InventoryExports\\TEMP_EXPORT.EXP", inv_range_list:list[tuple[str]] = [], sort_field = 2, conflicts:Literal["replace","update","merge","skip"] = "update", store_num = 0):
+def get_inventory(export_file:str|None = f"{ks_path}\\InventoryExports\\TEMP_EXPORT.EXP", inv_range_list:list[tuple[str]] = [], sort_field = 2, conflicts:Literal["replace","update","merge","skip"] = "update", store_num = 0):
     global inv_ranges, current_store
     if export_file == None:
         export_file = open_file_dialogue(title = "Import file", default_name="KSEXPORT.EXP", types=[("Keystoke Export","*")], multi_select=False)
@@ -207,10 +218,10 @@ def get_inventory(export_file:str|None = "K:\\InventoryExports\\TEMP_EXPORT.EXP"
         "DATAWH"
     )
     
-    if not os.path.exists("K:\\KEYSTROK"):
-        print("KEYSTOKE directory does not exist or is not set up right.")
+    if not ks_link_enabled:
+        print("Unable to link to KEYSTROKE. Failed to retrieve inventory.")
         return False
-    os.chdir("K:\\KEYSTROK")
+    os.chdir(f"{ks_path}\\KEYSTROK")
     
     if conflicts == "replace":
         data.reset()
@@ -218,7 +229,7 @@ def get_inventory(export_file:str|None = "K:\\InventoryExports\\TEMP_EXPORT.EXP"
     if len(inv_ranges) > 0:
         for r in inv_ranges:
             os.system(f'echo Retrieving Items in range {r[0]},{r[1]}...')
-            os.system(f'KSEXPORT.EXE /NOP /NODISPLAY /D {store_data[store_num]} FILE="{export_file}" TAB=ON TYPE=DI SORT={sort_field} START={r[0]} END={r[1]} INIFILE=K:\\KEYSTROK\\INIS\\MAIN\\KSEXP.INI')
+            os.system(f'KSEXPORT.EXE /NOP /NODISPLAY /D {store_data[store_num]} FILE="{export_file}" TAB=ON TYPE=DI SORT={sort_field} START={r[0]} END={r[1]} INIFILE={ks_path}\\KEYSTROK\\INIS\\MAIN\\KSEXP.INI')
             data.import_file(export_file,conflicts, exclude_flags = ["new"])
     else:
         os.system(f'echo No import range given ...')
@@ -230,18 +241,18 @@ def send_inventory(flags = []):
         print("Nothing to send")
         return False
     
-    if not os.path.exists("K:\\KEYSTROK"):
-        print("KEYSTOKE directory does not exist or is not set up right.")
+    if not ks_link_enabled:
+        print("Unable to link to KEYSTROKE. Failed to retrieve inventory.")
         return False
     
     get_inventory()
     print("Sending to Keystroke...")
     try:
-        data.export_file("K:\\InventoryExports\\IMPORT.IMP", flags = flags)
+        data.export_file(f"{ks_path}\\InventoryExports\\IMPORT.IMP", flags = flags)
     except Exception:
         print("Error exporting data")
         return False
-    os.chdir("K:\\KEYSTROK")
+    os.chdir(f"{ks_path}\\KEYSTROK")
     os.system(f'echo Sending to Keystoke... & IMP.EXE /NOP /NODISPLAY METHOD=MERGE DBNAME=INV')
     print("Done")
     return True
@@ -680,7 +691,7 @@ def export_variance(scope = None, switches:dict[str,str] = {}, options:set[str] 
     if "file" in switches:
         file = switches["file"]
     elif file == "":
-        file = save_file_dialogue(title = "Export Variance file", default_dir="K:\\InventoryExports", default_name="KSVARIANCE.LOG", types=[("Keystoke Variance File","log")])
+        file = save_file_dialogue(title = "Export Variance file", default_dir=f"{ks_path}\\InventoryExports", default_name="KSVARIANCE.LOG", types=[("Keystoke Variance File","log")])
     if file == None: return False
 
     def _wrapper(flags = "",nflags = "",**kwargs):
@@ -710,7 +721,7 @@ def load(scope = None, switches:dict[str,str] = {}, options:set[str] = set(), va
         if file != None:
             file_names.append(file)
         elif len(file_names) < 1:
-            file_names = open_file_dialogue(title="Open File", default_dir="K:\\InventoryExports\\Counts", default_name=f"inventory",types=[("Inventory Count File","count")])
+            file_names = open_file_dialogue(title="Open File", default_dir=f"{ks_path}\\InventoryExports\\Counts", default_name=f"inventory",types=[("Inventory Count File","count")])
 
         if file_names != None:
             if conflicts == "replace":
@@ -740,7 +751,7 @@ def save(scope = None, switches:dict[str,str] = {}, options:set[str] = set(), va
     elif file == "":
         min,max = get_inv_range()
         file = save_file_dialogue(title = "Save file", 
-                                  default_dir="K:\\InventoryExports\\Counts",
+                                  default_dir=f"{ks_path}\\InventoryExports\\Counts",
                                   default_name=f"inventory_{min}-{max}" if data.filename == "" else data.filename, 
                                   types=[("Inventory Count File","count")])
     if file == None: return False
