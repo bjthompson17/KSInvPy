@@ -29,7 +29,7 @@ error_duration = 500  # duration in ms
 
 window = tk.Tk()
 window.title("Inventory Bikes")
-window.geometry("800x500")
+window.geometry("900x500")
 
 menu_bar = tk.Menu(window, tearoff = 0)
 control_frame = tk.Frame(window)
