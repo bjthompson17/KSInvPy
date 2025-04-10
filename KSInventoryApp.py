@@ -375,6 +375,8 @@ def parse_search_args(switches:dict[str,str], options:set[str]):
             search_args["removed"] = False
         if option in ("ncounted", "nc"):
             search_args["counted"] = False
+        if option in ("nservice", "ns"):
+            search_args["service"] = False
                 
     return search_args
 

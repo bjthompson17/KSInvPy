@@ -313,6 +313,7 @@ def my_filter(scope,switches,options,values):
     bool_new_search_op.set(not ("nnew" in options))
     bool_removed_search_op.set(not ("nremoved" in options))
     bool_counted_search_op.set(not ("ncounted" in options))
+    bool_service_search_op.set(not ("nservice" in options))
 
     filter_results = KSIA.filter(None, switches, options, values)
     return filter_results
@@ -660,6 +661,8 @@ def update_filter(options:set[str] = set()):
         filter_options.add("nremoved")
     if not bool_counted_search_op.get():
         filter_options.add("ncounted")
+    if not bool_service_search_op.get():
+        filter_options.add("nservice")
 
     filter_results = KSIA.filter(None, switches, filter_options)
     update_screen()
@@ -834,6 +837,7 @@ bool_op_sb_frame = tk.Frame(search_frame)
 bool_new_search_op = tk.BooleanVar(value = True)
 bool_removed_search_op = tk.BooleanVar(value = True)
 bool_counted_search_op = tk.BooleanVar(value = True)
+bool_service_search_op = tk.BooleanVar(value = True)
 checkbox = tk.Checkbutton(bool_op_sb_frame, text = "Added", variable=bool_new_search_op)
 checkbox.bind("<Return>",update_search)
 checkbox.pack(side="left")
@@ -841,6 +845,9 @@ checkbox = tk.Checkbutton(bool_op_sb_frame, text = "Removed", variable=bool_remo
 checkbox.bind("<Return>",update_search)
 checkbox.pack(side="left")
 checkbox = tk.Checkbutton(bool_op_sb_frame, text = "Counted", variable=bool_counted_search_op)
+checkbox.bind("<Return>",update_search)
+checkbox.pack(side="left")
+checkbox = tk.Checkbutton(bool_op_sb_frame, text = "Service", variable=bool_service_search_op)
 checkbox.bind("<Return>",update_search)
 checkbox.pack(side="left")
 bool_op_sb_frame.grid(column=1, row=6, columnspan=4, sticky="w")

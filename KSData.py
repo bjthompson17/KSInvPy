@@ -99,6 +99,7 @@ class KSItem:
                  serialized:bool = True,
                  cost: float = 0.0,
                  retail: float = 0.0,
+                 service: bool = False,
                  flags:list[str] = []):
         self._id:int = id
         self.prod_code:str = prod_code
@@ -111,6 +112,7 @@ class KSItem:
         self._phys:float = 0.0
         self.cost:float = cost
         self.retail:float = retail
+        self.service:bool = service
         
         for sn in self.serial_nums:
             sn._parent = self
@@ -404,7 +406,7 @@ class KSItem:
     def __repr__(self):
         q = "'"
         c = ":"
-        out_str = f"{self.prod_code + c:<8} \'{self.desc + q:<32} QOH: {int(self.qoh) if self.qoh.is_integer() else self.qoh:<3} Phys: {int(self.phys) if self.phys.is_integer() else self.phys:<3}" + f" Avg Cost: ${self.cost:.2f}"
+        out_str = f"{self.prod_code + c:<8} \'{self.desc + q:<32} {'*service' if self.service else '':<8} QOH: {int(self.qoh) if self.qoh.is_integer() else self.qoh:<3} Phys: {int(self.phys) if self.phys.is_integer() else self.phys:<3}" + f" Avg Cost: ${self.cost:.2f}"
         return out_str
 
 class KSSearchResult:
@@ -501,41 +503,41 @@ class KSDataSet:
                     print("Error reading import file")
                     return
                 
-                if fields[13] == "0":
-                    last_count = date.today()
-                    try:
-                        last_count = datetime.strptime(fields[61],r'%m/%d/%y').date()
-                    except ValueError:
-                        pass
-                    try:
-                        item = KSItem(
-                            id = int(fields[0]),
-                            prod_code = fields[1],
-                            desc = fields[3],
-                            qoh = float(fields[9]),
-                            last_count = last_count,
-                            serialized = fields[42] == "1",
-                            cost = float(fields[7]),
-                            retail = float(fields[5]))
-                    except ValueError:
-                        pass
+                last_count = date.today()
+                try:
+                    last_count = datetime.strptime(fields[61],r'%m/%d/%y').date()
+                except ValueError:
+                    pass
+                try:
+                    item = KSItem(
+                        id = int(fields[0]),
+                        prod_code = fields[1],
+                        desc = fields[3],
+                        qoh = float(fields[9]),
+                        last_count = last_count,
+                        serialized = fields[42] == "1",
+                        cost = float(fields[7]),
+                        retail = float(fields[5]),
+                        service = fields[13] != "0")
+                except ValueError:
+                    pass
+                else:
+                    for cereal in fields[32].split("\xff"):
+                        if cereal != "":
+                            cereal = cereal.upper()
+                            item.add_serial_num(cereal, update_qoh = False , new = False)
+                    if item.serialized:
+                        item.phys = float(item.sn_count)
+                    exists = item.id in self.items
+                    if not exists:
+                        self.items[item.id] = item
                     else:
-                        for cereal in fields[32].split("\xff"):
-                            if cereal != "":
-                                cereal = cereal.upper()
-                                item.add_serial_num(cereal, update_qoh = False , new = False)
-                        if item.serialized:
-                            item.phys = float(item.sn_count)
-                        exists = item.id in self.items
-                        if not exists:
+                        if resolve_conflicts == "replace":
                             self.items[item.id] = item
-                        else:
-                            if resolve_conflicts == "replace":
-                                self.items[item.id] = item
-                            elif resolve_conflicts == "merge":
-                                self.items[item.id].merge(item, exclude_flags=exclude_flags)
-                            elif resolve_conflicts == "update":
-                                self.items[item.id].update(item, exclude_flags=exclude_flags)
+                        elif resolve_conflicts == "merge":
+                            self.items[item.id].merge(item, exclude_flags=exclude_flags)
+                        elif resolve_conflicts == "update":
+                            self.items[item.id].update(item, exclude_flags=exclude_flags)
                 
                 line = in_file.readline().strip()
             
@@ -673,6 +675,9 @@ class KSDataSet:
                         "\n")
         with open(file_name,"w", encoding="cp1252") as out_file:
             for key,value in self.items.items():
+                # No point in variancing service items because QOH does not change
+                if value.service: continue 
+                
                 prep_result = self._prep_for_variance(value)
                 if len(prep_result[2]) > 0:
                     instructions += f"\nItem {value.prod_code} - {value.desc}:\n"
@@ -783,7 +788,7 @@ class KSDataSet:
     def search(self,serial_id:list[str] = [], nserial_id:list[str] = [], prod_code:list[str] = [], nprod_code:list[str] = [], desc:list[str] = [], ndesc:list[str] = [],
                  eval_str: str = "", serial_num:list[str] = [], nserial_num:list[str] = [], last_count:list[str] = [], nlast_count:list[str] = [],
                  flags:list[str] = [], nflags:list[str] = [], item_only = False, scope:KSSearchResult|None = None, errors = 0, all_items = False, 
-                 new = True, removed = True, counted = True):
+                 new = True, removed = True, counted = True, service = True):
         
         og_terms:dict[str,str] = {}
         results:dict[KSItem, list[KSSerializedItem]] = {}
@@ -901,7 +906,12 @@ class KSDataSet:
             # TODO: implement
             print("KSDataSet: search: last_count not implemented yet")
         
-        
+        if not service:
+            for i in search_targets:
+                if not i.service:
+                    target_buffer.append(i)
+            search_targets = target_buffer.copy()
+            target_buffer:list[KSItem] = []
 
         id_search_terms = []
         if len(serial_id) > 0:
@@ -935,6 +945,7 @@ class KSDataSet:
         
         if item_only:
             og_terms["item_only"] = item_only
+            
 
         all_sns = len(serial_id) == 0 and len(nserial_id) == 0 \
                 and len(serial_num) == 0 and len(nserial_num) == 0 \
