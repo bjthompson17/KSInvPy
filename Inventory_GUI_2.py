@@ -736,7 +736,7 @@ def export_vexport():
     text_display.insert(tk.END,chars = f"Exporting Variance File ...\n")
     text_display.config(state=tk.DISABLED)
     text_display.update()
-    KSIA.export_variance()
+    KSIA.export_variance(switches={"file": KSIA.ks_path + "\\InventoryExports\\KSVARIANCE.LOG"})
     refresh_filter()
 export_menu.add_command(label = "Export Variance", command = export_vexport)
 

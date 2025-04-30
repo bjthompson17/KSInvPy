@@ -690,11 +690,11 @@ def export_variance(scope = None, switches:dict[str,str] = {}, options:set[str] 
     file = ""
     if len(values) > 0:
         file = values[0]
-    if "file" in switches:
+    elif "file" in switches:
         file = switches["file"]
     elif file == "":
         file = save_file_dialogue(title = "Export Variance file", default_dir=f"{ks_path}\\InventoryExports", default_name="KSVARIANCE.LOG", types=[("Keystoke Variance File","log")])
-    if file == None: return False
+    if file == "": return False
 
     def _wrapper(flags = "",nflags = "",**kwargs):
         get_inventory(store_num=current_store)
