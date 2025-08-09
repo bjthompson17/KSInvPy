@@ -667,14 +667,17 @@ class KSDataSet:
         return (export_phys, serial_string, instruct_string)
     
     # TODO: Allow configuration for product code or stock number exports.
-    def export_variance(self, file_name:str):
+    # TODO: Allow configuration for onscreen only or all items export.
+    def export_variance(self, file_name:str,scope:KSSearchResult=None):
         instructions = ("Exit -> Database Manager\n"
                         "Special -> Variance, press OK\n"
                         "Variance -> Parameters -> Entry Field -> Stock Number, press F10\n"
                         "Special -> Import File..., press F10\n"
                         "\n")
+        data=self.items.items()
+        
         with open(file_name,"w", encoding="cp1252") as out_file:
-            for key,value in self.items.items():
+            for key,value in data:
                 # No point in variancing service items because QOH does not change
                 if value.service: continue 
                 

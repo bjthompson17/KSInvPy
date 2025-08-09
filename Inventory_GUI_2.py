@@ -22,6 +22,8 @@ import KSInventoryApp as KSIA
 #
 # More info on text indicies: https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/text-index.html
 
+#TODO: add option to export only what's on screen or all items
+
 filter_results:KSD.KSSearchResult = KSD.KSSearchResult()
 
 error_frequency = 1500  # frequency in Hertz
