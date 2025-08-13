@@ -22,7 +22,9 @@ import KSInventoryApp as KSIA
 #
 # More info on text indicies: https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/text-index.html
 
-#TODO: add option to export only what's on screen or all items
+#TODO: add option to export either only on screen or all items
+
+#TODO: add import options screen to allow customization of importing hidden and service numbers
 
 filter_results:KSD.KSSearchResult = KSD.KSSearchResult()
 
