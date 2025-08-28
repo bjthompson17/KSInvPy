@@ -9,12 +9,9 @@ from typing import Literal,Any
 import KSData as KSD
 import KSInventoryApp as KSIA
 
-# TODO: Add UI configuration for product code or stock # 
-# in export variance.
+# TODO: add import options screen to allow customization of importing hidden and service numbers
 
-# TODO: Add checkbox to enable/disable RegEx searching
-
-# TODO: Make manual fixes easier (half done)
+# TODO: add option to export either only on screen or all items
 
 # TODO: add cursor selection support. Relevant example code below:
 # text_widget.mark_set(tk.INSERT, "1.0")  # Set cursor position to line 1, column 0
@@ -22,9 +19,14 @@ import KSInventoryApp as KSIA
 #
 # More info on text indicies: https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/text-index.html
 
-#TODO: add option to export either only on screen or all items
+# TODO: Make manual fixes easier (half done)
 
-#TODO: add import options screen to allow customization of importing hidden and service numbers
+# TODO: make 'forget' command update what inventory gets imported. Add import filter to ignore numbers in range for faster importing
+
+# TODO: Add checkbox to enable/disable RegEx searching
+
+# TODO: Add UI configuration for product code or stock # 
+# in export variance.
 
 filter_results:KSD.KSSearchResult = KSD.KSSearchResult()
 
