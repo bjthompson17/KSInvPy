@@ -44,17 +44,18 @@ text_display["yscrollcommand"] = vsb.set
 class PrintWindow(simpledialog.Dialog):
     def __init__(self, parent, title = None):
         self.printer_names = []
-        for x in wp.EnumPrinters(wp.PRINTER_ENUM_LOCAL):
-            printer = wp.OpenPrinter(x[2])
-            driver_name = None
-            try:
-                printer_data = wp.GetPrinter(printer,2)
-                driver_name = printer_data["pDriverName"]
-            finally:
-                wp.ClosePrinter(printer)
+        self.printers_offline:list[int] = []
+        idx = 0
+        for x in wp.EnumPrinters(wp.PRINTER_ENUM_LOCAL,None,2): 
+            pName = x['pPrinterName']
+            driver_name = x["pDriverName"]
+            online = (x["Attributes"] & wp.PRINTER_ATTRIBUTE_WORK_OFFLINE) == 0
             if driver_name != None and ("ZDesigner" in driver_name or "Generic / Text Only" in driver_name):
-                self.printer_names.append(x[2])
-                pass
+                self.printer_names.append(pName)
+                if not online:
+                    self.printers_offline.append(idx)
+            idx += 1
+            
 
         # datatype of menu text
         self.selected_printer = tk.StringVar()
@@ -101,7 +102,9 @@ class PrintWindow(simpledialog.Dialog):
     
     def body(self,master:tk.Frame):
         tk.Label(master,text = "Select Printer:")
-        self.printer_menu = tk.OptionMenu( master , self.selected_printer , *(self.printer_names) )
+        self.printer_menu:tk.Menu = tk.OptionMenu( master , self.selected_printer , *(self.printer_names) )
+        # for i in self.printers_offline:
+        #     self.printer_menu.entryconfig(i,state="disabled")
         settings_frame = tk.Frame(master)
         self.printer_dpi = tk.OptionMenu(settings_frame,self.dpi,203,300)
         self.printer_lang = tk.OptionMenu(settings_frame,self.language,"EPL","ZPL")
