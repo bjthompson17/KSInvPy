@@ -688,14 +688,18 @@ def file_clear():
     print("File->Clear")
     if messagebox.askokcancel("Clear Items", "Are you sure you want to clear all items?"):
         KSIA.reset()
-    refresh_filter()
+        refresh_filter()
+        return True
+    return False
 file_menu.add_command(label="Clear Items", command=file_clear)
 
 def file_open():
     print("File->Open")
-    file_clear()
-    KSIA.load()
-    refresh_filter()
+    if file_clear():
+        KSIA.load()
+        refresh_filter()
+        return True
+    return False
 file_menu.add_command(label= "Open", command= file_open)
 
 def file_merge():
