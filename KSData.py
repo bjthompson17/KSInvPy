@@ -217,6 +217,7 @@ class KSItem:
             str(self.cost),
             str(self.retail),
             "\x1D".join( (x.get_file_string() for x in self.serial_nums if x.has_flags_allof(flags) and not x.has_flags_oneof(nflags)) ),
+            str(self.service),
             "\n"
         )
         return "\t".join(return_vals)
@@ -236,7 +237,7 @@ class KSItem:
             for serial in fields[7].split("\x1D"):
                     if len(serial) > 0:
                         item.add_serial_item(KSSerializedItem.from_file_string(serial), update_qoh=False)
-        else:
+        elif len(fields) < 11:
             item = KSItem(
                 id = int(fields[0]),
                 prod_code = fields[1],
@@ -247,6 +248,21 @@ class KSItem:
                 serialized = fields[6] == "True",
                 cost = float(fields[7]),
                 retail = float(fields[8]))
+            for serial in fields[9].split("\x1D"):
+                    if len(serial) > 0:
+                        item.add_serial_item(KSSerializedItem.from_file_string(serial), update_qoh=False)
+        else:
+            item = KSItem(
+                id = int(fields[0]),
+                prod_code = fields[1],
+                desc = fields[2],
+                qoh = float(fields[3]),
+                phys = float(fields[4]),
+                last_count = datetime.strptime(fields[5],r'%m/%d/%Y').date(),
+                serialized = fields[6] == "True",
+                cost = float(fields[7]),
+                retail = float(fields[8]),
+                service = fields[10] == "True")
             for serial in fields[9].split("\x1D"):
                     if len(serial) > 0:
                         item.add_serial_item(KSSerializedItem.from_file_string(serial), update_qoh=False)
