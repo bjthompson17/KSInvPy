@@ -42,6 +42,8 @@ control_frame = tk.Frame(window)
 text_display = tk.Text(window, state = tk.DISABLED, wrap = 'none', font=("Consolas",12))
 vsb = tk.Scrollbar(window, orient='vertical',command = text_display.yview)
 text_display["yscrollcommand"] = vsb.set
+text_display.tag_config("current_line",background='blue',foreground='white')
+
 
 class PrintWindow(simpledialog.Dialog):
     def __init__(self, parent, title = None):
@@ -399,9 +401,13 @@ def my_get_inv(scope,switches:dict,options:set,values:list):
 KSIA.command_list["get_inv"] = my_get_inv
 
 def handleArrowKeys(event:tk.Event = None):
-    
     focused_element = window.focus_get()
-    if focused_element.master.master == None: return
+    
+    if focused_element is None or isinstance(focused_element,tk.Text):
+        return
+        
+    if focused_element.master.master == None: 
+        return
     
     next_element = focused_element
 
@@ -471,7 +477,19 @@ window.bind('<Alt-Right>',handleArrowKeys)
 window.bind('<KeyPress-Up>',handleArrowKeys)
 window.bind('<KeyPress-Down>',handleArrowKeys)
 
+def handleCursor(event:tk.Event = None):
+    element = event.widget
+    if not isinstance(element,tk.Text): return
+    newCursorRow = int(element.index(tk.INSERT).split('.')[0]) # index in form `row.column`, starts with `1.0`
+    element.mark_set(tk.INSERT,str(newCursorRow)+'.1')
+    element.tag_remove('current_line','1.0','end')
+    element.tag_add('current_line','insert linestart','insert lineend + 1 chars')
+    
+text_display.bind('<Key>', lambda e: text_display.after(1,handleCursor,e))
+text_display.bind('<Button-1>', lambda e: text_display.after(1,handleCursor,e))
+
 def update_screen():
+    current_cursor_idx = text_display.index(tk.INSERT)
     def blend_color(color1:tuple[int,int,int]|None, color2:tuple[int,int,int]|str|None = None, percent_blend = 0.5):
         if color2 == None:
             color2 = color1
@@ -634,6 +652,10 @@ def update_screen():
                 except tk.TclError:
                     print("Color error:",bg_color)
                     text_display.tag_config(f'SN{sn.id}',background="white",foreground="black", selectbackground="blue", selectforeground="white")
+    
+    text_display.mark_set(tk.INSERT,current_cursor_idx)
+    text_display.tag_add('current_line','insert linestart','insert lineend + 1 chars')
+    text_display.tag_raise('current_line')
     text_display.config(state=tk.DISABLED)
     result_count.config(text = f"Store: {GetInvWindow.STORES[KSIA.current_store]}\n{item_count} results: {sn_count} bikes, {phys_count} total items, {-1 * missing_count} variance \n"
                         f" Expected Cost: ${total_cost:.2f} \t Count Cost: ${phys_cost:.2f} \t Diff: ${phys_cost - total_cost:.2f}\n"
@@ -1074,9 +1096,24 @@ window.bind("<Alt-Q>", lambda e: scan_quantity_entry.focus_set())
 window.bind("<Alt-x>", lambda e: global_ctrl_flags.focus_set())
 window.bind("<Alt-X>", lambda e: global_ctrl_flags.focus_set())
 
+# Text area
+window.bind("<Alt-t>", lambda e: text_display.focus_set())
+window.bind("<Alt-T>", lambda e: text_display.focus_set())
+
 def manage_item_details(e):
-    ItemDetailWindow(window,result=(filter_results.get_first_result() if (len(filter_results.result) > 0) else None))
-    update_screen()
+    current_line_ranges = text_display.tag_ranges('current_line')
+    if len(current_line_ranges) > 0:
+        tags = text_display.tag_names(current_line_ranges[0])
+        if len(tags) > 1:
+            item_tag = tags[-2]
+            if item_tag[0:2] == "IT":
+                item = KSIA.data.items[int(item_tag[2:])]
+                ItemDetailWindow(window,result=(item,filter_results.result[item]))
+            elif item_tag[0:2] == "SN":
+                search_results = KSIA.find(filter_results,{'id':item_tag[2:]})
+                ItemDetailWindow(window,result=search_results.get_first_result())
+        text_display.focus_set()
+        update_screen()
 
 window.bind("<F3>", manage_item_details)
 
