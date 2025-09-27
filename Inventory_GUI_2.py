@@ -42,7 +42,7 @@ control_frame = tk.Frame(window)
 text_display = tk.Text(window, state = tk.DISABLED, wrap = 'none', font=("Consolas",12))
 vsb = tk.Scrollbar(window, orient='vertical',command = text_display.yview)
 text_display["yscrollcommand"] = vsb.set
-text_display.tag_config("current_line",background='blue',foreground='white')
+text_display.tag_config("current_line",background="#797979",foreground='white')
 
 
 class PrintWindow(simpledialog.Dialog):
@@ -136,6 +136,20 @@ class GetInvWindow(simpledialog.Dialog):
     def __init__(self, parent, title = None, store_num = 0):
         self.store_name = tk.StringVar(value = self.STORES[store_num])
         self.result = None
+        self.shared_presets = {}
+        self.local_presets = {}
+        if os.path.exists(KSIA.SHARED_CONFIG_PATH + "\\inv_range_presets.json"):
+            self.shared_presets = KSIA.load_config(KSIA.SHARED_CONFIG_PATH + "\\inv_range_presets.json")
+        else:
+            with open(KSIA.SHARED_CONFIG_PATH + "\\inv_range_presets.json", "w") as file:
+                file.write(r"{}")
+        
+        if os.path.exists(KSIA.LOCAL_CONFIG_PATH + "\\inv_range_presets.json"):
+            self.local_presets = KSIA.load_config(KSIA.LOCAL_CONFIG_PATH + "\\inv_range_presets.json")
+        else:
+            with open(KSIA.LOCAL_CONFIG_PATH + "\\inv_range_presets.json", "w") as file:
+                file.write(r"{}")
+        self.list_options = self.shared_presets.keys()
         simpledialog.Dialog.__init__(self, parent, title)
     def body(self, master):
         store_frame = tk.Frame(master)
@@ -154,39 +168,38 @@ class GetInvWindow(simpledialog.Dialog):
         self.range_entry.select_range(0,tk.END)
         self.range_entry.pack(expand=True, fill=tk.X)
         
-        
-        shared_presets = {}
-        local_presets = {}
-        if os.path.exists(KSIA.SHARED_CONFIG_PATH + "\\inv_range_presets.json"):
-            shared_presets = KSIA.load_config(KSIA.SHARED_CONFIG_PATH + "\\inv_range_presets.json")
-        else:
-            with open(KSIA.SHARED_CONFIG_PATH + "\\inv_range_presets.json", "w") as file:
-                file.write(r"{}")
-        
-        if os.path.exists(KSIA.LOCAL_CONFIG_PATH + "\\inv_range_presets.json"):
-            local_presets = KSIA.load_config(KSIA.LOCAL_CONFIG_PATH + "\\inv_range_presets.json")
-        else:
-            with open(KSIA.LOCAL_CONFIG_PATH + "\\inv_range_presets.json", "w") as file:
-                file.write(r"{}")
-        
-        
         tk.Label(master, text = "Presets:").pack()
         self.preset_list = tk.Listbox(master,selectmode=tk.MULTIPLE,height=10,)
-        self.preset_list.insert(tk.END, *local_presets.keys())
-        self.preset_list.insert(tk.END, *shared_presets.keys())
+        self.preset_list.insert(tk.END, *self.local_presets.keys())
+        self.preset_list.insert(tk.END, *self.shared_presets.keys())
         self.preset_list.pack(expand = True,fill = 'x')
-            
+        
+        self.search_entry = tk.Entry(master)
+        self.search_entry.pack()
+        def preset_filter(event:tk.Event = None):
+            regex_flags = re.BESTMATCH|re.IGNORECASE
+            search_str = self.search_entry.get()
+            self.preset_list.delete(0, tk.END)
+            for preset in self.local_presets.keys():
+                if re.search(search_str,preset,flags=regex_flags) is not None:
+                    self.preset_list.insert(tk.END, preset)
+            for preset in self.shared_presets.keys():
+                if re.search(search_str,preset,flags=regex_flags) is not None:
+                    self.preset_list.insert(tk.END, preset)
+        self.search_entry.bind("<Key>", preset_filter)
+        
         def on_preset_select(event):
             selections = self.preset_list.curselection()
             
             ranges = []
             for sel in selections:
-                if sel >= len(local_presets):
-                    ranges.append(shared_presets[event.widget.get(sel - len(local_presets))])
+                if sel >= len(self.local_presets):
+                    ranges.append(self.shared_presets[event.widget.get(sel - len(self.local_presets))])
                 else:
-                    ranges.append(local_presets[event.widget.get(sel)])
+                    ranges.append(self.local_presets[event.widget.get(sel)])
             self.range_entry.delete(0, tk.END)
             self.range_entry.insert(tk.END,",".join(ranges))
+            
         self.preset_list.bind("<<ListboxSelect>>",on_preset_select)
         return self.range_entry
 
@@ -484,9 +497,12 @@ def handleCursor(event:tk.Event = None):
     element.mark_set(tk.INSERT,str(newCursorRow)+'.1')
     element.tag_remove('current_line','1.0','end')
     element.tag_add('current_line','insert linestart','insert lineend + 1 chars')
-    
+
+
 text_display.bind('<Key>', lambda e: text_display.after(1,handleCursor,e))
 text_display.bind('<Button-1>', lambda e: text_display.after(1,handleCursor,e))
+text_display.bind('<FocusIn>', lambda e: text_display.tag_config('current_line',background="blue"))
+text_display.bind('<FocusOut>', lambda e: text_display.tag_config('current_line',background="#797979"))
 
 def update_screen():
     current_cursor_idx = text_display.index(tk.INSERT)
