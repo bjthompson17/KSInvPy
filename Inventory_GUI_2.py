@@ -235,7 +235,7 @@ class ItemDetailWindow(simpledialog.Dialog):
         tk.Label(desc_frame, text=f"Desc: {self.item.desc}").pack(side='left')
         desc_frame.pack(expand=True,fill='x')
         
-        self.phys_count = tk.IntVar(value = self.item.phys)
+        self.phys_count = tk.DoubleVar(value = self.item.phys)
         count_frame = tk.Frame(master)
         tk.Label(count_frame, text = f"QOH: {self.item.qoh} ").pack(side='left')
         phys_entry = tk.Entry(count_frame, textvariable=self.phys_count)
