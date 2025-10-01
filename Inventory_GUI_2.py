@@ -29,6 +29,7 @@ import KSInventoryApp as KSIA
 # in export variance.
 
 filter_results:KSD.KSSearchResult = KSD.KSSearchResult()
+selected_line_info = None
 
 error_frequency = 1500  # frequency in Hertz
 error_duration = 500  # duration in ms
@@ -489,18 +490,38 @@ window.bind('<KeyPress-Up>',handleArrowKeys)
 window.bind('<KeyPress-Down>',handleArrowKeys)
 
 def handleCursor(event:tk.Event = None):
+    global selected_line_info
     element = event.widget
     if not isinstance(element,tk.Text): return
     newCursorRow = int(element.index(tk.INSERT).split('.')[0]) # index in form `row.column`, starts with `1.0`
     element.mark_set(tk.INSERT,str(newCursorRow)+'.1')
     element.tag_remove('current_line','1.0','end')
     element.tag_add('current_line','insert linestart','insert lineend + 1 chars')
+    
+    current_line_ranges = text_display.tag_ranges('current_line')
+    if len(current_line_ranges) > 0:
+        tags = text_display.tag_names(tk.INSERT)
+        if len(tags) > 1:
+            item_tag = tags[-2]
+            if item_tag[0:2] == "IT":
+                item = KSIA.data.items[int(item_tag[2:])]
+                selected_line_info = ("IT",(item,filter_results.result[item]))
+            elif item_tag[0:2] == "SN":
+                search_results = KSIA.find(filter_results,{'id':item_tag[2:]})
+                selected_line_info = ("SN",(search_results.get_first_result()))
 
+def textFocus(e, in_out = "in"):
+    if in_out == "in":
+        text_display.tag_config('current_line',background="blue")
+    elif in_out == "out":
+        text_display.tag_config('current_line',background="#797979")
+    else:
+        print(f'invalid focus type "{in_out}"')
 
 text_display.bind('<Key>', lambda e: text_display.after(1,handleCursor,e))
 text_display.bind('<Button-1>', lambda e: text_display.after(1,handleCursor,e))
-text_display.bind('<FocusIn>', lambda e: text_display.tag_config('current_line',background="blue"))
-text_display.bind('<FocusOut>', lambda e: text_display.tag_config('current_line',background="#797979"))
+text_display.bind('<FocusIn>', lambda e: textFocus(e, "in"))
+text_display.bind('<FocusOut>', lambda e: textFocus(e, "out"))
 
 def update_screen():
     current_cursor_idx = text_display.index(tk.INSERT)
@@ -1115,22 +1136,43 @@ window.bind("<Alt-t>", lambda e: text_display.focus_set())
 window.bind("<Alt-T>", lambda e: text_display.focus_set())
 
 def manage_item_details(e):
+    if selected_line_info is None: return
     current_line_ranges = text_display.tag_ranges('current_line')
     if len(current_line_ranges) > 0:
-        tags = text_display.tag_names(current_line_ranges[0])
-        if len(tags) > 1:
-            item_tag = tags[-2]
-            if item_tag[0:2] == "IT":
-                item = KSIA.data.items[int(item_tag[2:])]
-                ItemDetailWindow(window,result=(item,filter_results.result[item]))
-            elif item_tag[0:2] == "SN":
-                search_results = KSIA.find(filter_results,{'id':item_tag[2:]})
-                ItemDetailWindow(window,result=search_results.get_first_result())
+        # tags = text_display.tag_names(current_line_ranges[0])
+        # if len(tags) > 1:
+        #     item_tag = tags[-2]
+        #     if item_tag[0:2] == "IT":
+        #         item = KSIA.data.items[int(item_tag[2:])]
+        #         ItemDetailWindow(window,result=(item,filter_results.result[item]))
+        #     elif item_tag[0:2] == "SN":
+        #         search_results = KSIA.find(filter_results,{'id':item_tag[2:]})
+        #         ItemDetailWindow(window,result=search_results.get_first_result())
+        ItemDetailWindow(window,result=selected_line_info[1])
         text_display.focus_set()
         update_screen()
-
+        
 window.bind("<F3>", manage_item_details)
 
+def quick_count(e, amount):
+    if selected_line_info is None: return
+    if selected_line_info[0] == "IT":
+        if not (selected_line_info[1][0].serialized or selected_line_info[1][0].service):
+            selected_line_info[1][0].phys += amount
+    elif selected_line_info[0] == "SN":
+        if amount > 0:
+            selected_line_info[1][1][0].restore()
+        elif amount < 0:
+            selected_line_info[1][1][0].remove()
+    update_screen()
+    
+text_display.bind("<Alt-=>", lambda e: quick_count(e, 1))
+text_display.bind("<Alt-minus>", lambda e: quick_count(e, -1))
+text_display.bind("<Alt-+>", lambda e: quick_count(e, 10))
+text_display.bind("<Alt-_>", lambda e: quick_count(e, -10))
+
+window.bind('<Control-BackSpace>', lambda e: KSIA.run_command(None, "filter"))
+    
 def on_closing():
     if messagebox.askokcancel("Quit", "Do you want to quit?"):
         window.destroy()
