@@ -793,6 +793,7 @@ def get_inv(scope = None, switches:dict[str,str] = {}, options:set[str] = set(),
             ranges = range.split(",")
             func_args["inv_range_list"] = []
             for r in ranges:
+                if len(r) <= 0: break
                 values = r.split("..")
                 inv_range = (values[0],values[-1])
                 func_args["inv_range_list"].append(inv_range)

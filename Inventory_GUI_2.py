@@ -149,7 +149,7 @@ class GetInvWindow(simpledialog.Dialog):
         else:
             with open(KSIA.LOCAL_CONFIG_PATH + "\\inv_range_presets.json", "w") as file:
                 file.write(r"{}")
-        self.list_options = self.shared_presets.keys()
+        self.list_options = list(self.local_presets.keys()) + list(self.shared_presets.keys())
         simpledialog.Dialog.__init__(self, parent, title)
     def body(self, master):
         store_frame = tk.Frame(master)
@@ -169,7 +169,7 @@ class GetInvWindow(simpledialog.Dialog):
         self.range_entry.pack(expand=True, fill=tk.X)
         
         tk.Label(master, text = "Presets:").pack()
-        self.preset_list = tk.Listbox(master,selectmode=tk.MULTIPLE,height=10,)
+        self.preset_list = tk.Listbox(master,selectmode=tk.SINGLE,height=10,)
         self.preset_list.insert(tk.END, *self.local_presets.keys())
         self.preset_list.insert(tk.END, *self.shared_presets.keys())
         self.preset_list.pack(expand = True,fill = 'x')
@@ -186,19 +186,17 @@ class GetInvWindow(simpledialog.Dialog):
             for preset in self.shared_presets.keys():
                 if re.search(search_str,preset,flags=regex_flags) is not None:
                     self.preset_list.insert(tk.END, preset)
-        self.search_entry.bind("<Key>", preset_filter)
+        self.search_entry.bind("<Key>", lambda e: self.search_entry.after(1,preset_filter,e))
+        self.bind("<Control-f>",lambda e: self.search_entry.focus_set())
+        self.bind("<Control-F>",lambda e: self.search_entry.focus_set())
         
         def on_preset_select(event):
-            selections = self.preset_list.curselection()
-            
-            ranges = []
-            for sel in selections:
-                if sel >= len(self.local_presets):
-                    ranges.append(self.shared_presets[event.widget.get(sel - len(self.local_presets))])
-                else:
-                    ranges.append(self.local_presets[event.widget.get(sel)])
-            self.range_entry.delete(0, tk.END)
-            self.range_entry.insert(tk.END,",".join(ranges))
+            selection = self.preset_list.curselection()
+            if len(selection) <= 0: return
+            sel = selection[0]
+            if self.range_entry.select_present():
+                self.range_entry.delete(tk.SEL_FIRST, tk.SEL_LAST)
+            self.range_entry.insert(tk.END,("," if len(self.range_entry.get()) > 0 and self.range_entry.get()[-1] != ',' else "") + (self.shared_presets[event.widget.get(sel - len(self.local_presets))] if selection[0] >= len(self.local_presets) else self.local_presets[event.widget.get(sel)]))
             
         self.preset_list.bind("<<ListboxSelect>>",on_preset_select)
         return self.range_entry
