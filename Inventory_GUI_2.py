@@ -244,10 +244,10 @@ class ItemDetailWindow(simpledialog.Dialog):
         
         
         if(not self.item.serialized):
-            self.bind("<Alt-=>", lambda e: self.changeCount(1))
-            self.bind("<Alt-minus>", lambda e: self.changeCount(-1))
-            self.bind("<Alt-+>", lambda e: self.changeCount(10))
-            self.bind("<Alt-_>", lambda e: self.changeCount(-10))
+            self.bind("<=>", lambda e: self.changeCount(1))
+            self.bind("<minus>", lambda e: self.changeCount(-1))
+            self.bind("<+>", lambda e: self.changeCount(10))
+            self.bind("<_>", lambda e: self.changeCount(-10))
             self.bind("<Alt-c>", lambda e: phys_entry.focus_set())
             self.bind("<Alt-C>", lambda e: phys_entry.focus_set())
         else:
@@ -1160,10 +1160,10 @@ def quick_count(e, amount):
             selected_line_info[1][1][0].remove()
     update_screen()
     
-text_display.bind("<Alt-=>", lambda e: quick_count(e, 1))
-text_display.bind("<Alt-minus>", lambda e: quick_count(e, -1))
-text_display.bind("<Alt-+>", lambda e: quick_count(e, 10))
-text_display.bind("<Alt-_>", lambda e: quick_count(e, -10))
+text_display.bind("<=>", lambda e: quick_count(e, 1))
+text_display.bind("<minus>", lambda e: quick_count(e, -1))
+text_display.bind("<+>", lambda e: quick_count(e, 10))
+text_display.bind("<_>", lambda e: quick_count(e, -10))
 
 window.bind('<Control-BackSpace>', lambda e: run_command("filter"))
     
