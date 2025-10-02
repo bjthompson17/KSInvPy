@@ -344,9 +344,11 @@ KSIA.command_list["filter"] = my_filter
 
 def my_find(scope,switches,options,values):
     results:KSD.KSSearchResult = KSIA.find(scope,switches,options,values)
-    current_tag = text_display.tag_names("@0,0")[0]
+    current_line = text_display.tag_ranges("current_line")
+    if len(current_line) <= 0:
+        current_line = ("0.0",)
+    current_tag = text_display.tag_names(current_line[0])[0]
     current_tag_pos = text_display.tag_ranges(f"{current_tag}")[0]
-    
     next_type = "IT"
     next_id = results.get_items()[0].id
     
@@ -372,6 +374,8 @@ def my_find(scope,switches,options,values):
         tag_pos = text_display.tag_ranges(f"{next_type}{next_id}")[0]
         text_display.see(tag_pos)
         text_display.yview_scroll(text_display.dlineinfo(tag_pos)[1], 'pixels' )
+        text_display.mark_set(tk.INSERT,tag_pos)
+        text_display.event_generate("<<Cursor>>")
     except IndexError:
         print("Not found")
         pass
@@ -519,6 +523,7 @@ def textFocus(e, in_out = "in"):
         print(f'invalid focus type "{in_out}"')
 
 text_display.bind('<Key>', lambda e: text_display.after(1,handleCursor,e))
+text_display.bind('<<Cursor>>', lambda e: text_display.after(1,handleCursor,e))
 text_display.bind('<Button-1>', lambda e: text_display.after(1,handleCursor,e))
 text_display.bind('<FocusIn>', lambda e: textFocus(e, "in"))
 text_display.bind('<FocusOut>', lambda e: textFocus(e, "out"))
@@ -1171,7 +1176,7 @@ text_display.bind("<Alt-minus>", lambda e: quick_count(e, -1))
 text_display.bind("<Alt-+>", lambda e: quick_count(e, 10))
 text_display.bind("<Alt-_>", lambda e: quick_count(e, -10))
 
-window.bind('<Control-BackSpace>', lambda e: KSIA.run_command(None, "filter"))
+window.bind('<Control-BackSpace>', lambda e: run_command("filter"))
     
 def on_closing():
     if messagebox.askokcancel("Quit", "Do you want to quit?"):
