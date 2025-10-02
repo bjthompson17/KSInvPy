@@ -13,13 +13,11 @@ import KSInventoryApp as KSIA
 
 # TODO: add option to export either only on screen or all items
 
-# TODO: add cursor selection support. Relevant example code below:
+# Example code for cursor manipulation below:
 # text_widget.mark_set(tk.INSERT, "1.0")  # Set cursor position to line 1, column 0
 # position = text_widget.index(tk.INSERT) # Get cursor position. Returns line.column
 #
 # More info on text indicies: https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/text-index.html
-
-# TODO: Make manual fixes easier (half done)
 
 # TODO: make 'forget' command update what inventory gets imported. Add import filter to ignore numbers in range for faster importing
 
@@ -1144,15 +1142,6 @@ def manage_item_details(e):
     if selected_line_info is None: return
     current_line_ranges = text_display.tag_ranges('current_line')
     if len(current_line_ranges) > 0:
-        # tags = text_display.tag_names(current_line_ranges[0])
-        # if len(tags) > 1:
-        #     item_tag = tags[-2]
-        #     if item_tag[0:2] == "IT":
-        #         item = KSIA.data.items[int(item_tag[2:])]
-        #         ItemDetailWindow(window,result=(item,filter_results.result[item]))
-        #     elif item_tag[0:2] == "SN":
-        #         search_results = KSIA.find(filter_results,{'id':item_tag[2:]})
-        #         ItemDetailWindow(window,result=search_results.get_first_result())
         ItemDetailWindow(window,result=selected_line_info[1])
         text_display.focus_set()
         update_screen()
