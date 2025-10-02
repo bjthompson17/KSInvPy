@@ -41,7 +41,7 @@ control_frame = tk.Frame(window)
 text_display = tk.Text(window, state = tk.DISABLED, wrap = 'none', font=("Consolas",12))
 vsb = tk.Scrollbar(window, orient='vertical',command = text_display.yview)
 text_display["yscrollcommand"] = vsb.set
-text_display.tag_config("current_line",background="#797979",foreground='white')
+text_display.tag_config("current_line",background="#797979",foreground='white',selectbackground="black")
 
 
 class PrintWindow(simpledialog.Dialog):
