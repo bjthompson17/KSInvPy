@@ -244,10 +244,10 @@ class ItemDetailWindow(simpledialog.Dialog):
         
         
         if(not self.item.serialized):
-            self.bind("<=>", lambda e: self.changeCount(1))
-            self.bind("<minus>", lambda e: self.changeCount(-1))
-            self.bind("<+>", lambda e: self.changeCount(10))
-            self.bind("<_>", lambda e: self.changeCount(-10))
+            self.bind("<Alt-=>", lambda e: self.changeCount(1))
+            self.bind("<Alt-minus>", lambda e: self.changeCount(-1))
+            self.bind("<Alt-+>", lambda e: self.changeCount(10))
+            self.bind("<Alt-_>", lambda e: self.changeCount(-10))
             self.bind("<Alt-c>", lambda e: phys_entry.focus_set())
             self.bind("<Alt-C>", lambda e: phys_entry.focus_set())
         else:
