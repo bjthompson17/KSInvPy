@@ -692,7 +692,7 @@ def update_screen():
                     text_display.tag_config(f'SN{sn.id}',background="white",foreground="black", selectbackground="blue", selectforeground="white")
     
     text_display.mark_set(tk.INSERT,current_cursor_idx)
-    text_display.tag_add('current_line','insert linestart','insert lineend + 1 chars')
+    text_display.event_generate("<<Cursor>>")
     text_display.tag_raise('current_line')
     text_display.config(state=tk.DISABLED)
     result_count.config(text = f"Store: {GetInvWindow.STORES[KSIA.current_store]}\n{item_count} results: {sn_count} bikes, {phys_count} total items, {-1 * missing_count} variance \n"
@@ -1153,12 +1153,19 @@ def quick_count(e, amount):
     if selected_line_info[0] == "IT":
         if not (selected_line_info[1][0].serialized or selected_line_info[1][0].service):
             selected_line_info[1][0].phys += amount
+        elif selected_line_info[1][0].serialized and amount > 1:
+            new_sn = simpledialog.askstring("Add serial number",f'Enter serial number to be added to "{selected_line_info[1][0].desc}"')
+            selected_line_info[1][0].add_serial_num(new_sn)
     elif selected_line_info[0] == "SN":
         if amount > 0:
-            selected_line_info[1][1][0].restore()
+            if amount > 1:
+                new_sn = simpledialog.askstring("Add serial number",f'Enter serial number to be added to "{selected_line_info[1][0].desc}"')
+                selected_line_info[1][0].add_serial_num(new_sn)
+            else:    
+                selected_line_info[1][1][0].restore()
         elif amount < 0:
             selected_line_info[1][1][0].remove()
-    update_screen()
+    update_filter()
     
 text_display.bind("<=>", lambda e: quick_count(e, 1))
 text_display.bind("<minus>", lambda e: quick_count(e, -1))
