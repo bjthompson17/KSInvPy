@@ -963,6 +963,8 @@ def scanner_count_item():
                 tag_pos = tag_range[0]
                 text_display.see(tag_pos)
                 text_display.yview_scroll(text_display.dlineinfo(tag_pos)[1], 'pixels' )
+                text_display.mark_set(tk.INSERT,tag_pos)
+                text_display.event_generate("<<Cursor>>")
             key.increase_count(quantity)
             break
         for sn in value:
@@ -976,6 +978,8 @@ def scanner_count_item():
                     tag_pos = tag_range[0]
                     text_display.see(tag_pos)
                     text_display.yview_scroll(text_display.dlineinfo(tag_pos)[1], 'pixels' )
+                    text_display.mark_set(tk.INSERT,tag_pos)
+                    text_display.event_generate("<<Cursor>>")
             except IndexError:
                 pass
             
