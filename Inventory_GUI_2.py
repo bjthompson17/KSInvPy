@@ -279,6 +279,44 @@ class ItemDetailWindow(simpledialog.Dialog):
     
     # def validate(self):
     #     return 1
+    
+    
+class SNFlagWindow(simpledialog.Dialog):
+    def __init__(self, parent, title = None, sn_item:KSD.KSSerializedItem=None):
+        if sn_item is not None:
+            self.sn_item:KSD.KSSerializedItem = sn_item
+        else:
+            return
+        simpledialog.Dialog.__init__(self, parent, title)
+    def body(self, master):
+        flag_entry_frame = tk.Frame(master)
+        tk.Label(flag_entry_frame,text="Add flag: ").pack(side='left')
+        self.flag_entry = tk.Entry(flag_entry_frame)
+        self.flag_entry.pack(side='left',expand=1,fill='x')
+        flag_entry_frame.pack(expand=1)
+        
+        tk.Label(master,text="Remove Flags:").pack()
+        self.flag_list = tk.Listbox(master,background="#ddd", foreground="black", selectbackground="#999", 
+                                          selectforeground="#444", selectmode=tk.MULTIPLE, height=5)
+        for flag in self.sn_item.flags:
+            self.flag_list.insert(tk.END,flag)
+        self.flag_list.pack()
+        return self.flag_entry
+    
+    def apply(self):
+        if len(self.flag_entry.get()) > 0:
+            self.sn_item.set_flags([x.strip() for x in self.flag_entry.get().split(";")])
+        try:
+            for flag in self.flag_list.selection_get().split('\n'):
+                self.sn_item.remove_flag(flag)
+        except tk.TclError as err:
+            pass
+        # for i,flag in enumerate(self.sn_item.flags):
+        #     if self.flag_list.selection_includes(i):
+        #         run_command(f"unflag /id {self.sn_item.id} {flag}")
+    
+    # def validate(self):
+    #     return 1
      
 # Overloading commands 
 def my_filter(scope,switches,options,values):
@@ -1169,12 +1207,24 @@ def quick_count(e, amount):
                 selected_line_info[1][1][0].restore()
         elif amount < 0:
             selected_line_info[1][1][0].remove()
+    text_display.focus_set()
     update_filter()
     
 text_display.bind("<=>", lambda e: quick_count(e, 1))
 text_display.bind("<minus>", lambda e: quick_count(e, -1))
 text_display.bind("<+>", lambda e: quick_count(e, 10))
 text_display.bind("<_>", lambda e: quick_count(e, -10))
+
+def quick_flag(e):
+    if selected_line_info is None: return
+    if selected_line_info[0] == "IT": return
+    if selected_line_info[0] == "SN":
+        SNFlagWindow(window, title = "Edit Flags", sn_item = selected_line_info[1][1][0])
+    text_display.focus_set()
+    update_filter()
+
+text_display.bind("<f>",quick_flag)
+text_display.bind("<F>",quick_flag)
 
 window.bind('<Control-BackSpace>', lambda e: run_command("filter"))
     
