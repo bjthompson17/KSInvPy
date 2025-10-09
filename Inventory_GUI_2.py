@@ -881,7 +881,7 @@ def update_search(e:tk.Event = None):
         e.widget.select_range(0,tk.END)
     update_filter()
 
-tk.Label(search_frame, text = "Filter IDs:").grid(column=0,row = 0,sticky="w")
+tk.Label(search_frame, text = "I: Filter IDs:").grid(column=0,row = 0,sticky="w")
 id_sb = tk.Entry(search_frame)
 id_sb.bind("<Return>",update_search)
 id_sb.grid(column=1,row = 0,sticky="ew")
@@ -892,7 +892,7 @@ nid_sb.bind("<Return>",update_search)
 nid_sb.grid(column=3,row = 0,sticky="ew")
 
 
-tk.Label(search_frame,text="Filter Product Code:").grid(column=0,row = 1,sticky="w")
+tk.Label(search_frame,text="P: Filter Product Code:").grid(column=0,row = 1,sticky="w")
 prod_code_sb = tk.Entry(search_frame)
 prod_code_sb.bind("<Return>",update_search)
 prod_code_sb.grid(column=1,row = 1,sticky="ew")
@@ -903,7 +903,7 @@ nprod_code_sb.bind("<Return>",update_search)
 nprod_code_sb.grid(column=3,row = 1,sticky="ew")
 
 
-tk.Label(search_frame,text="Filter Item Description: ").grid(column=0,row = 2,sticky="w")
+tk.Label(search_frame,text="D: Filter Item Description: ").grid(column=0,row = 2,sticky="w")
 desc_sb = tk.Entry(search_frame)
 desc_sb.bind("<Return>",update_search)
 desc_sb.grid(column=1,row = 2,sticky="ew")
@@ -914,7 +914,7 @@ ndesc_sb.bind("<Return>",update_search)
 ndesc_sb.grid(column=3,row = 2,sticky="ew")
 
 
-tk.Label(search_frame,text = "Filter Serial Number: ").grid(column=0,row = 3,sticky="w")
+tk.Label(search_frame,text = "S: Filter Serial Number: ").grid(column=0,row = 3,sticky="w")
 serial_sb = tk.Entry(search_frame)
 serial_sb.bind("<Return>",update_search)
 serial_sb.grid(column=1,row = 3,sticky="ew")
@@ -925,7 +925,7 @@ nserial_sb.bind("<Return>",update_search)
 nserial_sb.grid(column=3,row = 3,sticky="ew")
 
 
-tk.Label(search_frame, text = "Filter Flags: ").grid(column=0,row = 4,sticky="w")
+tk.Label(search_frame, text = "G: Filter Flags: ").grid(column=0,row = 4,sticky="w")
 flags_sb = tk.Entry(search_frame)
 flags_sb.bind("<Return>",update_search)
 flags_sb.grid(column=1,row = 4,sticky="ew")
@@ -1050,7 +1050,7 @@ def scan_submit(mode:str):
         scan_quantity_entry.delete(0,tk.END)
 
 scan_frame = tk.Frame(flexible_frame)
-tk.Label(scan_frame, text = "Scan Item: ").grid(row = 0,column=0,sticky="w")
+tk.Label(scan_frame, text = "N: Scan Item: ").grid(row = 0,column=0,sticky="w")
 prod_code_scan_sb = tk.Entry(scan_frame)
 prod_code_scan_sb.bind('<Return>',lambda e: scan_submit("item"))
 prod_code_scan_sb.grid(row = 0,column=1,sticky="ew")
@@ -1064,7 +1064,7 @@ scan_option_frame = tk.Frame(scan_frame)
 item_only_scan_op = tk.BooleanVar(value=True)
 tk.Checkbutton(scan_option_frame,text="Item Only Scanning", variable=item_only_scan_op).pack(side = "left", anchor="w")
 
-tk.Label(scan_option_frame,text = "Quantity:").pack(side = "left")
+tk.Label(scan_option_frame,text = "Q: Quantity:").pack(side = "left")
 scan_quantity_entry = tk.Entry(scan_option_frame, width = 5)
 scan_quantity_entry.bind('<Return>',lambda e: scan_submit("sn"))
 scan_quantity_entry.pack(side = "left")
