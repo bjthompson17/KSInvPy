@@ -1205,8 +1205,10 @@ def quick_count(e, amount):
                 selected_line_info[1][0].add_serial_num(new_sn)
             else:    
                 selected_line_info[1][1][0].restore()
+                text_display.event_generate("<Down>")
         elif amount < 0:
             selected_line_info[1][1][0].remove()
+            text_display.event_generate("<Down>")
     text_display.focus_set()
     update_filter()
     
